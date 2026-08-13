@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>MixPay - ميكس باي</title>
+
+<!-- ===== مكتبات QR Code ===== -->
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+<style>
+/* ==============================================
+   MixPay - Design System
+   ============================================== */
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #0E0F1A;
+  --bg-elevated: #171826;
+  --surface: #1E2033;
+  --surface-2: #262A42;
+  --ink: #12131A;
+  --mix-violet: #7B6CF6;
+  --mix-teal: #3FD6C6;
+  --gold: #E8B45C;
+  --text-primary: #F3F2F8;
+  --text-secondary: #9C9DB8;
+  --text-muted: #6A6C89;
+  --success: #3FD6C6;
+  --danger: #F26D6D;
+  --grad-mix: linear-gradient(135deg, var(--mix-violet) 0%, var(--mix-teal) 100%);
+  --font-display: 'Tajawal', 'Cairo', sans-serif;
+  --font-body: 'Cairo', 'Tajawal', sans-serif;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --nav-height: 68px;
+  --shadow-card: 0 8px 30px rgba(0,0,0,0.35);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  direction: rtl; background: var(--bg); color: var(--text-primary);
+  font-family: var(--font-body); min-height: 100vh; -webkit-tap-highlight-color: transparent;
+}
+body { padding-bottom: calc(var(--nav-height) + 16px); }
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input { font-family: inherit; }
+
+.app-container { max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; background: var(--bg); }
+
+/* Views */
+.view { display: none; }
+.view.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.top-bar { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 8px; }
+.brand { font-family: var(--font-display); font-weight: 900; font-size: 26px; background: var(--grad-mix); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: 0.5px; }
+.brand-tagline { font-size: 11px; color: var(--text-muted); letter-spacing: 1px; }
+.icon-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 18px; transition: transform 0.15s ease, background 0.2s ease; }
+.icon-btn:active { transform: scale(0.92); background: var(--surface-2); }
+
+.wallet-card { margin: 12px 20px 20px; padding: 24px; border-radius: var(--radius-lg); background: var(--grad-mix); position: relative; overflow: hidden; box-shadow: 0 15px 40px rgba(123, 108, 246, 0.28); }
+.wallet-card::before { content: ""; position: absolute; inset: -40% -20% auto auto; width: 220px; height: 220px; background: radial-gradient(circle, rgba(255,255,255,0.25), transparent 70%); border-radius: 50%; animation: floatBlob 8s ease-in-out infinite; }
+.wallet-card::after { content: ""; position: absolute; inset: auto auto -30% -10%; width: 180px; height: 180px; background: radial-gradient(circle, rgba(232,180,92,0.35), transparent 70%); border-radius: 50%; animation: floatBlob 10s ease-in-out infinite reverse; }
+@keyframes floatBlob { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-10px, 10px) scale(1.08); } }
+.wallet-label { font-size: 13px; opacity: 0.85; position: relative; z-index: 1; }
+.wallet-balance { font-family: var(--font-display); font-weight: 900; font-size: 36px; margin: 6px 0 18px; position: relative; z-index: 1; }
+.wallet-number-row { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.18); backdrop-filter: blur(6px); padding: 10px 14px; border-radius: var(--radius-sm); position: relative; z-index: 1; width: fit-content; }
+.wallet-number-row span:first-child { font-size: 13px; opacity: 0.8; }
+.wallet-number { font-weight: 700; letter-spacing: 1px; }
+.copy-btn { font-size: 15px; opacity: 0.9; transition: transform 0.15s ease; }
+.copy-btn:active { transform: scale(0.85); }
+
+.quick-actions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 0 20px; margin-bottom: 24px; }
+.quick-action { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 4px; border-radius: var(--radius-md); background: var(--surface); transition: transform 0.15s ease, background 0.2s ease; }
+.quick-action:active { transform: scale(0.94); background: var(--surface-2); }
+.quick-action .qa-icon { font-size: 20px; }
+.quick-action .qa-label { font-size: 11px; color: var(--text-secondary); text-align: center; }
+
+.section-title { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; margin-bottom: 12px; }
+.section-title h3 { font-family: var(--font-display); font-size: 16px; font-weight: 700; }
+.section-title a { font-size: 12px; color: var(--mix-teal); }
+
+.products-scroll, .products-grid { display: grid; gap: 12px; padding: 0 20px; margin-bottom: 28px; }
+.products-scroll { grid-auto-flow: column; grid-auto-columns: 140px; overflow-x: auto; padding-bottom: 6px; }
+.products-grid { grid-template-columns: 1fr 1fr; }
+.product-card { background: var(--surface); border-radius: var(--radius-md); overflow: hidden; transition: transform 0.15s ease; }
+.product-card:active { transform: scale(0.97); }
+.product-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; background: var(--surface-2); }
+.product-info { padding: 10px 12px; }
+.product-info h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.product-price { font-size: 13px; color: var(--gold); font-weight: 700; }
+
+.transactions-list { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
+.transaction-item { display: flex; align-items: center; gap: 12px; background: var(--surface); border-radius: var(--radius-md); padding: 12px 14px; }
+.tx-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 17px; }
+.tx-info { flex: 1; display: flex; flex-direction: column; }
+.tx-title { font-size: 13.5px; font-weight: 600; }
+.tx-date { font-size: 11px; color: var(--text-muted); }
+.tx-amount { font-weight: 700; font-size: 14px; }
+.tx-amount.positive { color: var(--success); }
+.tx-amount.negative { color: var(--danger); }
+.empty-state { color: var(--text-muted); font-size: 13px; text-align: center; padding: 30px 0; }
+
+.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: var(--nav-height); background: var(--bg-elevated); border-top: 1px solid rgba(255,255,255,0.06); display: none; align-items: center; justify-content: space-around; z-index: 50; }
+.bottom-nav.active-nav { display: flex; }
+.bottom-nav a { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--text-muted); font-size: 10.5px; transition: color 0.2s ease; }
+.bottom-nav a .nav-icon { font-size: 20px; }
+.bottom-nav a.active { color: var(--mix-teal); }
+
+.page-header { padding: 20px 20px 12px; display: flex; align-items: center; gap: 12px; }
+.page-header h2 { font-family: var(--font-display); font-size: 19px; font-weight: 700; }
+
+.form-page { padding: 20px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+.form-group input, .form-group textarea { width: 100%; padding: 14px 16px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.08); background: var(--surface); color: var(--text-primary); font-size: 15px; outline: none; transition: border-color 0.2s ease; }
+.form-group input:focus, .form-group textarea:focus { border-color: var(--mix-teal); }
+.form-group input::placeholder { color: var(--text-muted); }
+
+.btn-primary { width: 100%; padding: 16px; border-radius: var(--radius-md); background: var(--grad-mix); color: #fff; font-weight: 700; font-size: 15px; text-align: center; transition: transform 0.15s ease, opacity 0.2s ease; }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.5; }
+.btn-secondary { width: 100%; padding: 14px; border-radius: var(--radius-md); background: var(--surface); color: var(--text-primary); font-weight: 600; font-size: 14px; text-align: center; border: 1px solid rgba(255,255,255,0.06); transition: background 0.2s ease; }
+.btn-secondary:active { background: var(--surface-2); }
+
+.form-footer-link { text-align: center; font-size: 13px; color: var(--text-secondary); margin-top: 20px; }
+.form-footer-link a { color: var(--mix-teal); font-weight: 600; cursor: pointer; }
+
+.auth-hero { text-align: center; padding: 60px 20px 30px; }
+.auth-hero .brand { font-size: 40px; }
+.auth-hero .brand-tagline { font-size: 13px; margin-top: 8px; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(5,6,12,0.7); backdrop-filter: blur(4px); display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; z-index: 100; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-sheet { width: 100%; max-width: 480px; background: var(--bg-elevated); border-radius: 24px 24px 0 0; padding: 24px 20px 32px; transform: translateY(30px); transition: transform 0.3s ease; }
+.modal-overlay.open .modal-sheet { transform: translateY(0); }
+.modal-handle { width: 40px; height: 4px; background: var(--surface-2); border-radius: 4px; margin: 0 auto 18px; }
+.modal-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; margin-bottom: 16px; text-align: center; }
+.confirm-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; font-size: 13.5px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.confirm-row span:first-child { color: var(--text-secondary); }
+.confirm-row.total span:last-child { color: var(--gold); font-weight: 700; }
+.success-icon { font-size: 56px; text-align: center; margin-bottom: 10px; }
+
+.toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 8px; width: 90%; max-width: 420px; }
+.toast { padding: 14px 18px; border-radius: var(--radius-md); background: var(--surface-2); color: var(--text-primary); font-size: 13.5px; text-align: center; box-shadow: var(--shadow-card); opacity: 0; transform: translateY(-10px); transition: all 0.3s ease; border-inline-start: 4px solid var(--mix-teal); }
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast-error { border-inline-start-color: var(--danger); }
+
+.loader-overlay { position: fixed; inset: 0; background: rgba(14,15,26,0.6); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 300; }
+.loader-overlay.visible { opacity: 1; pointer-events: all; }
+.spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.15); border-top-color: var(--mix-teal); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.glass-card { background: rgba(30,32,51,0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-lg); padding: 18px; }
+
+/* QR Code */
+#qrCodeContainer canvas { border-radius: 16px; background: #1E2033; padding: 12px; }
+
+@media (min-width: 600px) {
+  .app-container { max-width: 600px; border-inline: 1px solid rgba(255,255,255,0.05); }
+  .bottom-nav { max-width: 600px; }
+  .products-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1024px) {
+  body { display: flex; justify-content: center; background: var(--ink); padding-bottom: 0; }
+  .app-container { max-width: 480px; margin: 24px 0; border-radius: 32px; overflow: hidden; min-height: calc(100vh - 48px); box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+  .bottom-nav { position: absolute; max-width: 480px; border-radius: 0 0 32px 32px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="app-container" id="appContainer">
+
+  <!-- ============ شاشة: تسجيل الدخول ============ -->
+  <section class="view active" data-view="login">
+    <div class="auth-hero">
+      <div class="brand">MixPay</div>
+      <div class="brand-tagline">اشتري • اجمع • حوّل • استبدل</div>
+    </div>
+    <form class="form-page" id="loginForm">
+      <div class="form-group">
+        <label>البريد الإلكتروني</label>
+        <input type="email" id="loginEmail" placeholder="example@mail.com" required />
+      </div>
+      <div class="form-group">
+        <label>كلمة المرور</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" required />
+      </div>
+      <button type="submit" class="btn-primary">تسجيل الدخول</button>
+      <div class="form-footer-link">
+        ليس لديك حساب؟ <a onclick="navigateTo('register')">أنشئ حسابًا جديدًا</a>
+      </div>
+    </form>
+  </section>
+
+  <!-- ============ شاشة: التسجيل ============ -->
+  <section class="view" data-view="register">
+    <div class="page-header">
+      <button class="icon-btn" onclick="navigateTo('login')">→</button>
+      <h2>إنشاء حساب جديد</h2>
+    </div>
+    <form class="form-page" id="registerForm">
+      <div class="form-group">
+        <label>الاسم الكامل</label>
+        <input type="text" id="registerName" placeholder="اسمك" required />
+      </div>
+      <div class="form-group">
+        <label>البريد الإلكتروني</label>
+        <input type="email" id="registerEmail" placeholder="example@mail.com" required />
+      </div>
+      <div class="form-group">
+        <label>كلمة المرور</label>
+        <input type="password" id="registerPassword" placeholder="6 أحرف على الأقل" minlength="6" required />
+      </div>
+      <div class="form-group">
+        <label>رمز PIN (4 إلى 6 أرقام) — لتأكيد التحويلات</label>
+        <input type="password" id="registerPin" inputmode="numeric" placeholder="••••" maxlength="6" required />
+      </div>
+      <button type="submit" class="btn-primary">إنشاء الحساب</button>
+      <div class="form-footer-link">
+        لديك حساب بالفعل؟ <a onclick="navigateTo('login')">تسجيل الدخول</a>
+      </div>
+    </form>
+  </section>
+
+  <!-- ============ شاشة: الرئيسية ============ -->
+  <section class="view" data-view="home">
+    <div class="top-bar">
+      <div>
+        <div class="brand">MixPay</div>
+        <div class="brand-tagline">اشتري • اجمع • حوّل • استبدل</div>
+      </div>
+      <button class="icon-btn" onclick="navigateTo('profile')">👤</button>
+    </div>
+
+    <div class="wallet-card">
+      <div class="wallet-label">💰 الرصيد الحالي</div>
+      <div class="wallet-balance js-balance">0 د.ع</div>
+      <div class="wallet-number-row">
+        <span>رقم المحفظة</span>
+        <span class="wallet-number js-wallet-number">------</span>
+        <button class="copy-btn" onclick="copyToClipboard(currentWalletNumber)">📋</button>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <a class="quick-action" onclick="navigateTo('redeem')"><span class="qa-icon">🎁</span><span class="qa-label">إدخال كود</span></a>
+      <a class="quick-action" onclick="navigateTo('transfer')"><span class="qa-icon">🔄</span><span class="qa-label">تحويل</span></a>
+      <a class="quick-action" onclick="navigateTo('store')"><span class="qa-icon">🔁</span><span class="qa-label">استبدال</span></a>
+      <a class="quick-action" onclick="navigateTo('store')"><span class="qa-icon">🏪</span><span class="qa-label">المتجر</span></a>
+      <a class="quick-action" onclick="navigateTo('wallet')"><span class="qa-icon">📜</span><span class="qa-label">السجل</span></a>
+    </div>
+
+    <div class="section-title"><h3>🔥 المنتجات المميزة</h3><a onclick="navigateTo('store')">عرض الكل</a></div>
+    <div class="products-scroll" id="featuredProducts"></div>
+
+    <div class="section-title"><h3>🕐 آخر العمليات</h3><a onclick="navigateTo('wallet')">عرض الكل</a></div>
+    <div class="transactions-list" id="homeTransactionsList"></div>
+  </section>
+
+  <!-- ============ شاشة: المحفظة ============ -->
+  <section class="view" data-view="wallet">
+    <div class="page-header">
+      <button class="icon-btn" onclick="navigateTo('home')">→</button>
+      <h2>محفظتي</h2>
+    </div>
+    <div class="wallet-card">
+      <div class="wallet-label">💰 الرصيد الحالي</div>
+      <div class="wallet-balance js-balance">0 د.ع</div>
+      <div class="wallet-number-row">
+        <span>رقم المحفظة</span>
+        <span class="wallet-number js-wallet-number">------</span>
+        <button class="copy-btn" onclick="copyToClipboard(currentWalletNumber)">📋</button>
+      </div>
+    </div>
+    <div class="section-title"><h3>📜 سجل العمليات</h3></div>
+    <div class="transactions-list" id="walletTransactionsList"></div>
+  </section>
+
+  <!-- ============ شاشة: التحويل ============ -->
+  <section class="view" data-view="transfer">
+    <div class="page-header">
+      <button class="icon-btn" onclick="navigateTo('home')">→</button>
+      <h2>تحويل إلى مستخدم آخر</h2>
+    </div>
+    <div class="glass-card" style="margin:0 20px 20px;">
+      <div class="wallet-label">رصيدك الحالي</div>
+      <div class="wallet-balance js-balance" style="font-size:26px;">0 د.ع</div>
+    </div>
+    
+    <!-- زر عرض QR Code -->
+    <div style="padding:0 20px 12px;">
+      <button class="btn-secondary" onclick="showMyQR()" style="margin-bottom:0;">
+        📱 عرض QR Code محفظتي
+      </button>
+    </div>
+    
+    <form class="form-page" id="transferLookupForm" style="padding-top:0;">
+      <div class="form-group">
+        <label>رقم محفظة المستلم</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="toWalletNumber" inputmode="numeric" placeholder="مثال: 1999" required style="flex:1;" />
+          <button type="button" onclick="scanQRCode()" class="btn-secondary" style="width:auto;padding:14px 16px;font-size:20px;margin:0;">
+            📷
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>المبلغ (د.ع)</label>
+        <input type="number" id="transferAmount" min="250" placeholder="مثال: 2000" required />
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">
+        * رسوم تحويل ثابتة قدرها 250 د.ع تُخصم من المرسل فقط.
+      </p>
+      <button type="submit" class="btn-primary">متابعة التحويل</button>
+    </form>
+  </section>
+
+  <!-- ============ شاشة: إدخال كود ============ -->
+  <section class="view" data-view="redeem">
+    <div class="page-header">
+      <button class="icon-btn" onclick="navigateTo('home')">→</button>
+      <h2>🎁 إدخال كود</h2>
+    </div>
+    <div style="padding:10px 20px 20px;text-align:center;">
+      <div style="font-size:50px;">🎟️</div>
+      <p style="color:var(--text-secondary);font-size:13.5px;margin-top:8px;">
+        أدخل كود المنتج الموجود على عبوتك لإضافة قيمته إلى محفظتك مباشرة.
+      </p>
+    </div>
+    <form class="form-page" id="redeemForm" style="padding-top:0;">
+      <div class="form-group">
+        <label>كود MixPay</label>
+        <input type="text" id="codeInput" placeholder="MXP-XXXX-XXXX" style="text-align:center;letter-spacing:2px;font-weight:700;" required />
+      </div>
+      <button type="submit" class="btn-primary">تحقق واستلم المكافأة</button>
+    </form>
+  </section>
+
+  <!-- ============ شاشة: المتجر ============ -->
+  <section class="view" data-view="store">
+    <div class="page-header">
+      <button class="icon-btn" onclick="navigateTo('home')">→</button>
+      <h2>🏪 MixPay Store</h2>
+    </div>
+    <div class="form-page" style="padding-top:0;">
+      <div class="form-group" style="margin-bottom:12px;">
+        <input type="text" id="productSearch" placeholder="🔍 ابحث عن منتج..." />
+      </div>
+    </div>
+    <div class="products-grid" id="productsGrid"></div>
+  </section>
+
+  <!-- ============ شاشة: حسابي ============ -->
+  <section class="view" data-view="profile">
+    <div class="page-header">
+      <button class="icon-btn" onclick="navigateTo('home')">→</button>
+      <h2>حسابي</h2>
+    </div>
+    <div class="glass-card" style="margin:0 20px 20px;text-align:center;">
+      <div style="width:72px;height:72px;border-radius:50%;background:var(--grad-mix);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px;">👤</div>
+      <div id="profileName" style="font-weight:700;font-size:17px;"></div>
+      <div id="profileEmail" style="color:var(--text-secondary);font-size:13px;margin-top:4px;"></div>
+    </div>
+    <div class="form-page" style="padding-top:0;">
+      <div class="glass-card" style="margin-bottom:12px;">
+        <div class="confirm-row"><span>رقم المحفظة</span><span id="profileWallet">-</span></div>
+        <div class="confirm-row"><span>تاريخ الانضمام</span><span id="profileJoinDate">-</span></div>
+      </div>
+      <button class="btn-secondary" id="logoutBtn" style="color:var(--danger);">🚪 تسجيل الخروج</button>
+    </div>
+  </section>
+
+  <!-- ============ التنقل السفلي ============ -->
+  <nav class="bottom-nav" id="bottomNav">
+    <a data-nav="home" onclick="navigateTo('home')"><span class="nav-icon">🏠</span>الرئيسية</a>
+    <a data-nav="store" onclick="navigateTo('store')"><span class="nav-icon">🏪</span>المتجر</a>
+    <a data-nav="transfer" onclick="navigateTo('transfer')"><span class="nav-icon">🔄</span>التحويل</a>
+    <a data-nav="wallet" onclick="navigateTo('wallet')"><span class="nav-icon">💰</span>المحفظة</a>
+    <a data-nav="profile" onclick="navigateTo('profile')"><span class="nav-icon">👤</span>حسابي</a>
+  </nav>
+
+</div>
+
+<!-- ============ نافذة: نجاح استبدال الكود ============ -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal-sheet" style="text-align:center;">
+    <div class="modal-handle"></div>
+    <div class="success-icon">🎉</div>
+    <div class="modal-title">مبروك!</div>
+    <p style="color:var(--text-secondary);font-size:14px;margin-bottom:6px;">تمت إضافة</p>
+    <div class="wallet-balance" id="successAmount" style="font-size:28px;color:var(--gold);">0 د.ع</div>
+    <p style="color:var(--text-secondary);font-size:14px;margin:6px 0 20px;">إلى محفظتك</p>
+    <button class="btn-primary" onclick="closeModal('successModal')">تم</button>
+  </div>
+</div>
+
+<!-- ============ نافذة: تأكيد التحويل ============ -->
+<div class="modal-overlay" id="confirmTransferModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">تأكيد التحويل</div>
+    <div class="confirm-row"><span>المستلم</span><span id="confirmRecipientName">-</span></div>
+    <div class="confirm-row"><span>رقم المحفظة</span><span id="confirmWalletNumber">-</span></div>
+    <div class="confirm-row"><span>المبلغ</span><span id="confirmAmount">-</span></div>
+    <div class="confirm-row"><span>رسوم التحويل</span><span id="confirmFee">-</span></div>
+    <div class="confirm-row total"><span>إجمالي الخصم</span><span id="confirmTotal">-</span></div>
+    <form id="transferConfirmForm">
+      <div class="form-group" style="margin-top:16px;">
+        <label>أدخل PIN للتأكيد</label>
+        <input type="password" id="transferPin" inputmode="numeric" maxlength="6" placeholder="••••" required />
+      </div>
+      <button type="submit" class="btn-primary">تأكيد وإرسال</button>
+      <button type="button" class="btn-secondary" style="margin-top:10px;" onclick="closeModal('confirmTransferModal')">إلغاء</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ نافذة: تفاصيل المنتج ============ -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <img id="productModalImage" src="" alt="" style="width:100%;border-radius:16px;aspect-ratio:4/3;object-fit:cover;background:var(--surface-2);margin-bottom:14px;" />
+    <div class="modal-title" id="productModalName" style="text-align:right;">-</div>
+    <p style="color:var(--text-secondary);font-size:13.5px;margin-bottom:14px;" id="productModalDesc"></p>
+    <div class="confirm-row total"><span>السعر</span><span id="productModalPrice">-</span></div>
+    <button class="btn-primary" style="margin-top:16px;" onclick="confirmPurchase()">🔄 استبدال الآن</button>
+    <button class="btn-secondary" style="margin-top:10px;" onclick="closeModal('productModal')">إغلاق</button>
+  </div>
+</div>
+
+<!-- ============ نافذة: QR Code ============ -->
+<div class="modal-overlay" id="qrModal">
+  <div class="modal-sheet" style="text-align:center;">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📱 رمز محفظتي</div>
+    <p style="color:var(--text-secondary);font-size:13px;margin-bottom:14px;">
+      امسح الكود لتحويل المال إليّ
+    </p>
+    <div id="qrCodeContainer" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
+    <div class="confirm-row">
+      <span>رقم المحفظة</span>
+      <span id="qrWalletNumber">-</span>
+    </div>
+    <button class="btn-primary" onclick="closeModal('qrModal')">تم</button>
+    <button class="btn-secondary" style="margin-top:10px;" onclick="closeModal('qrModal')">إغلاق</button>
+  </div>
+</div>
+
+<!-- ============ Firebase SDK ============ -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ==============================================
+// MixPay - إعدادات Firebase
+// ==============================================
+const firebaseConfig = {
+  apiKey: "AIzaSyA4MvZBdOT7fFQ6ZFf5TPNH-kgnqg0aYW0",
+  authDomain: "mixpay-edb5a.firebaseapp.com",
+  databaseURL: "https://mixpay-edb5a-default-rtdb.firebaseio.com",
+  projectId: "mixpay-edb5a",
+  storageBucket: "mixpay-edb5a.firebasestorage.app",
+  messagingSenderId: "637517014028",
+  appId: "1:637517014028:web:0ae5bedc4cba85afcb7a29",
+  measurementId: "G-ZQ565N504N"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ==============================================
+// أدوات مساعدة عامة (Utils)
+// ==============================================
+function formatIQD(amount) { return new Intl.NumberFormat("ar-IQ").format(amount) + " د.ع"; }
+
+function showToast(message, type = "success") {
+  let container = document.getElementById("toastContainer");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toastContainer";
+    container.className = "toast-container";
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add("show"));
+  setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 300); }, 3200);
+}
+
+function showLoader() {
+  let loader = document.getElementById("globalLoader");
+  if (!loader) {
+    loader = document.createElement("div");
+    loader.id = "globalLoader";
+    loader.className = "loader-overlay";
+    loader.innerHTML = `<div class="spinner"></div>`;
+    document.body.appendChild(loader);
+  }
+  loader.classList.add("visible");
+}
+function hideLoader() {
+  const loader = document.getElementById("globalLoader");
+  if (loader) loader.classList.remove("visible");
+}
+
+async function copyToClipboard(text) {
+  try { await navigator.clipboard.writeText(text); showToast("تم النسخ بنجاح 📋"); }
+  catch (e) { showToast("تعذر النسخ", "error"); }
+}
+
+function openModal(id) { const m = document.getElementById(id); if (m) m.classList.add("open"); }
+function closeModal(id) { const m = document.getElementById(id); if (m) m.classList.remove("open"); }
+
+function formatDateTime(timestamp) {
+  if (!timestamp) return "-";
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  return date.toLocaleString("ar-IQ", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+// ==============================================
+// نظام التنقل بين الشاشات (SPA Router)
+// ==============================================
+const MAIN_VIEWS = ["home", "wallet", "transfer", "redeem", "store", "profile"];
+
+function navigateTo(viewName) {
+  document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
+  const target = document.querySelector(`.view[data-view="${viewName}"]`);
+  if (target) target.classList.add("active");
+
+  const bottomNav = document.getElementById("bottomNav");
+  if (MAIN_VIEWS.includes(viewName)) {
+    bottomNav.classList.add("active-nav");
+  } else {
+    bottomNav.classList.remove("active-nav");
+  }
+  document.querySelectorAll("#bottomNav a").forEach((a) => {
+    a.classList.toggle("active", a.dataset.nav === viewName);
+  });
+
+  if (viewName === "home") { loadTransactions("homeTransactionsList", 5); loadProducts("featuredProducts", true); }
+  if (viewName === "wallet") { loadTransactions("walletTransactionsList", 50); }
+  if (viewName === "store") { loadProducts("productsGrid", false); }
+  if (viewName === "profile") { loadProfile(); }
+
+  window.scrollTo(0, 0);
+}
+
+// ==============================================
+// المصادقة (Authentication)
+// ==============================================
+let currentWalletNumber = null;
+let currentUserData = null;
+let isRegistering = false;
+
+async function generateUniqueWalletNumber() {
+  let walletNumber, exists = true;
+  while (exists) {
+    walletNumber = String(Math.floor(100000 + Math.random() * 900000));
+    if (walletNumber === "1999") continue;
+    const doc = await db.collection("wallets").doc(walletNumber).get();
+    exists = doc.exists;
+  }
+  return walletNumber;
+}
+
+function hashPin(pin) {
+  let hash = 0;
+  for (let i = 0; i < pin.length; i++) {
+    const char = pin.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return "pin_" + Math.abs(hash).toString(16) + "_" + pin.length;
+}
+
+async function loginUser(email, password) {
+  showLoader();
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+  } catch (error) {
+    showToast(translateAuthError(error.code), "error");
+  } finally {
+    hideLoader();
+  }
+}
+
+async function registerUser(name, email, password, pin) {
+  if (!name || name.trim().length < 2) {
+    showToast("الاسم يجب أن يكون حرفين على الأقل", "error");
+    return;
+  }
+  if (!email || !email.includes('@')) {
+    showToast("البريد الإلكتروني غير صحيح", "error");
+    return;
+  }
+  if (!password || password.length < 6) {
+    showToast("كلمة المرور يجب أن تكون 6 أحرف على الأقل", "error");
+    return;
+  }
+  if (!pin || !/^\d{4,6}$/.test(pin)) {
+    showToast("PIN يجب أن يكون من 4 إلى 6 أرقام", "error");
+    return;
+  }
+
+  showLoader();
+  isRegistering = true;
+  
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, password);
+    const uid = cred.user.uid;
+    const walletNumber = await generateUniqueWalletNumber();
+    const pinHash = hashPin(pin);
+
+    await db.collection("users").doc(uid).set({
+      uid,
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      walletId: `wallets/${walletNumber}`,
+      pinHash: pinHash,
+      role: "user",
+      status: "active",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    await db.collection("wallets").doc(walletNumber).set({
+      walletNumber,
+      uid,
+      balance: 0,
+      currency: "IQD",
+      status: "active",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    currentUserData = { 
+      uid, 
+      name: name.trim(), 
+      email: email.toLowerCase().trim(), 
+      walletId: `wallets/${walletNumber}`,
+      role: "user",
+      status: "active"
+    };
+    currentWalletNumber = walletNumber;
+
+    document.querySelectorAll(".js-balance").forEach((el) => (el.textContent = formatIQD(0)));
+    document.querySelectorAll(".js-wallet-number").forEach((el) => (el.textContent = walletNumber));
+
+    navigateTo("home");
+    showToast("🎉 تم إنشاء الحساب بنجاح!");
+    listenToWalletBalance(walletNumber);
+
+  } catch (error) {
+    console.error("❌ Registration error:", error);
+    showToast(translateAuthError(error.code) || "حدث خطأ أثناء التسجيل", "error");
+    try {
+      if (auth.currentUser) await auth.currentUser.delete();
+    } catch (e) { /* تجاهل */ }
+  } finally {
+    isRegistering = false;
+    hideLoader();
+  }
+}
+
+function translateAuthError(code) {
+  const messages = {
+    "auth/email-already-in-use": "📧 البريد الإلكتروني مستخدم مسبقاً",
+    "auth/invalid-email": "📧 البريد الإلكتروني غير صالح",
+    "auth/weak-password": "🔒 كلمة المرور ضعيفة (6 أحرف على الأقل)",
+    "auth/user-not-found": "❌ الحساب غير موجود",
+    "auth/wrong-password": "🔑 كلمة المرور غير صحيحة",
+    "auth/too-many-requests": "⏳ محاولات كثيرة، حاول لاحقاً",
+    "auth/network-request-failed": "📡 مشكلة في الاتصال بالإنترنت"
+  };
+  return messages[code] || "⚠️ حدث خطأ: " + code;
+}
+
+function logout() { 
+  auth.signOut(); 
+  currentWalletNumber = null;
+  currentUserData = null;
+}
+
+// ==============================================
+// المحفظة (Wallet)
+// ==============================================
+async function loadWalletData(uid) {
+  try {
+    const userDoc = await db.collection("users").doc(uid).get();
+    if (!userDoc.exists) {
+      throw new Error("بيانات المستخدم غير موجودة");
+    }
+    currentUserData = userDoc.data();
+    const walletNumber = currentUserData.walletId.split("/")[1];
+    currentWalletNumber = walletNumber;
+
+    const walletDoc = await db.collection("wallets").doc(walletNumber).get();
+    if (!walletDoc.exists) {
+      throw new Error("المحفظة غير موجودة");
+    }
+    const walletData = walletDoc.data();
+
+    document.querySelectorAll(".js-balance").forEach((el) => (el.textContent = formatIQD(walletData.balance || 0)));
+    document.querySelectorAll(".js-wallet-number").forEach((el) => (el.textContent = walletNumber));
+
+    return { userData: currentUserData, walletData, walletNumber };
+  } catch (error) {
+    console.error("❌ loadWalletData error:", error);
+    throw error;
+  }
+}
+
+function listenToWalletBalance(walletNumber) {
+  if (!walletNumber) return;
+  db.collection("wallets").doc(walletNumber).onSnapshot((doc) => {
+    if (doc.exists) {
+      document.querySelectorAll(".js-balance").forEach((el) => (el.textContent = formatIQD(doc.data().balance || 0)));
+    }
+  });
+}
+
+async function loadTransactions(listElId, limit = 20) {
+  const listEl = document.getElementById(listElId);
+  if (!listEl || !auth.currentUser) return;
+
+  try {
+    const snapshot = await db.collection("transactions")
+      .where("uid", "==", auth.currentUser.uid)
+      .orderBy("createdAt", "desc").limit(limit).get();
+
+    if (snapshot.empty) { listEl.innerHTML = `<p class="empty-state">📭 لا توجد عمليات بعد</p>`; return; }
+
+    const icons = { REDEEM: "🎁", TRANSFER_OUT: "🔄", TRANSFER_IN: "💸", FEE: "💵", STORE_PURCHASE: "🛍️" };
+    const labels = { REDEEM: "مكافأة كود", TRANSFER_OUT: "تحويل صادر", TRANSFER_IN: "تحويل وارد", FEE: "رسوم تحويل", STORE_PURCHASE: "شراء من المتجر" };
+
+    listEl.innerHTML = snapshot.docs.map((doc) => {
+      const t = doc.data();
+      const isPositive = ["REDEEM", "TRANSFER_IN"].includes(t.type);
+      return `<div class="transaction-item">
+        <div class="tx-icon">${icons[t.type] || "📄"}</div>
+        <div class="tx-info"><span class="tx-title">${labels[t.type] || t.type}</span><span class="tx-date">${formatDateTime(t.createdAt)}</span></div>
+        <div class="tx-amount ${isPositive ? "positive" : "negative"}">${isPositive ? "+" : "-"}${formatIQD(t.amount)}</div>
+      </div>`;
+    }).join("");
+  } catch (e) {
+    console.error("loadTransactions error:", e);
+    listEl.innerHTML = `<p class="empty-state">❌ تعذر تحميل السجل</p>`;
+  }
+}
+
+// ==============================================
+// 🔧 استرداد كود - مباشرة من Firestore
+// ==============================================
+async function redeemCodeDirectly(code) {
+    if (!auth.currentUser) {
+        throw new Error('unauthenticated');
+    }
+
+    const snapshot = await db.collection('codes')
+        .where('code', '==', code)
+        .limit(1)
+        .get();
+
+    if (snapshot.empty) {
+        throw new Error('not-found');
+    }
+
+    const doc = snapshot.docs[0];
+    const codeData = doc.data();
+
+    if (codeData.status !== 'NEW') {
+        throw new Error('already-used');
+    }
+
+    const userDoc = await db.collection('users').doc(auth.currentUser.uid).get();
+    if (!userDoc.exists) {
+        throw new Error('user-not-found');
+    }
+
+    const walletNumber = userDoc.data().walletId.split('/')[1];
+    const walletRef = db.collection('wallets').doc(walletNumber);
+
+    await db.runTransaction(async (transaction) => {
+        const walletDoc = await transaction.get(walletRef);
+        if (!walletDoc.exists) {
+            throw new Error('wallet-not-found');
+        }
+
+        const currentBalance = walletDoc.data().balance || 0;
+        transaction.update(walletRef, {
+            balance: currentBalance + codeData.value
+        });
+
+        transaction.update(doc.ref, {
+            status: 'USED',
+            redeemedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            redeemedBy: auth.currentUser.uid
+        });
+
+        const txRef = db.collection('transactions').doc();
+        transaction.set(txRef, {
+            uid: auth.currentUser.uid,
+            walletNumber: walletNumber,
+            type: 'REDEEM',
+            amount: codeData.value,
+            code: code,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    });
+
+    return { value: codeData.value };
+}
+
+function translateRedeemError(message) {
+    const map = {
+        "not-found": "❌ الكود غير موجود",
+        "already-used": "⚠️ هذا الكود مستخدم من قبل",
+        "unauthenticated": "🔒 يجب تسجيل الدخول أولاً",
+        "user-not-found": "❌ المستخدم غير موجود",
+        "wallet-not-found": "❌ المحفظة غير موجودة"
+    };
+    return map[message] || "⚠️ تعذر التحقق من الكود";
+}
+
+// ==============================================
+// 🔧 التحويل - مباشرة من Firestore
+// ==============================================
+const TRANSFER_FEE = 250;
+let pendingTransfer = null;
+
+async function lookupRecipient() {
+  const toWallet = document.getElementById("toWalletNumber").value.trim();
+  const amount = Number(document.getElementById("transferAmount").value);
+
+  if (!toWallet || !amount || amount <= 0) { showToast("⚠️ أدخل بيانات صحيحة", "error"); return; }
+  if (toWallet === currentWalletNumber) { showToast("⚠️ لا يمكنك التحويل إلى محفظتك نفسها", "error"); return; }
+  if (amount < 250) { showToast("⚠️ الحد الأدنى للتحويل 250 د.ع", "error"); return; }
+
+  showLoader();
+  try {
+    const walletDoc = await db.collection("wallets").doc(toWallet).get();
+    if (!walletDoc.exists) { showToast("❌ رقم المحفظة غير موجود", "error"); return; }
+    const recipientData = walletDoc.data();
+    const recipientUser = await db.collection("users").doc(recipientData.uid).get();
+
+    pendingTransfer = { toWallet, amount };
+    document.getElementById("confirmRecipientName").textContent = recipientUser.data().name || "مستخدم";
+    document.getElementById("confirmWalletNumber").textContent = toWallet;
+    document.getElementById("confirmAmount").textContent = formatIQD(amount);
+    document.getElementById("confirmFee").textContent = formatIQD(TRANSFER_FEE);
+    document.getElementById("confirmTotal").textContent = formatIQD(amount + TRANSFER_FEE);
+    openModal("confirmTransferModal");
+  } catch (e) {
+    console.error("lookupRecipient error:", e);
+    showToast("❌ تعذر البحث عن المحفظة", "error");
+  } finally {
+    hideLoader();
+  }
+}
+
+async function executeTransfer() {
+  const pin = document.getElementById("transferPin").value.trim();
+  if (!pendingTransfer || !pin) return;
+  if (!/^\d{4,6}$/.test(pin)) { showToast("⚠️ PIN يجب أن يكون 4-6 أرقام", "error"); return; }
+
+  showLoader();
+  try {
+    const userDoc = await db.collection("users").doc(auth.currentUser.uid).get();
+    if (!userDoc.exists) {
+      throw new Error("المستخدم غير موجود");
+    }
+    
+    const pinHash = userDoc.data().pinHash || "";
+    const hashedPin = hashPin(pin);
+    if (pinHash !== hashedPin) {
+      throw new Error("invalid-pin");
+    }
+
+    const senderWalletNumber = currentWalletNumber;
+    const senderRef = db.collection("wallets").doc(senderWalletNumber);
+    const receiverRef = db.collection("wallets").doc(pendingTransfer.toWallet);
+
+    await db.runTransaction(async (transaction) => {
+      const senderDoc = await transaction.get(senderRef);
+      const receiverDoc = await transaction.get(receiverRef);
+      
+      if (!senderDoc.exists || !receiverDoc.exists) {
+        throw new Error("wallet-not-found");
+      }
+      
+      const senderBalance = senderDoc.data().balance || 0;
+      const totalAmount = pendingTransfer.amount + TRANSFER_FEE;
+      
+      if (senderBalance < totalAmount) {
+        throw new Error("insufficient-funds");
+      }
+      
+      transaction.update(senderRef, { 
+        balance: senderBalance - totalAmount,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      transaction.update(receiverRef, { 
+        balance: (receiverDoc.data().balance || 0) + pendingTransfer.amount,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      
+      const tx1 = db.collection("transactions").doc();
+      transaction.set(tx1, {
+        uid: auth.currentUser.uid,
+        walletNumber: senderWalletNumber,
+        type: 'TRANSFER_OUT',
+        amount: pendingTransfer.amount,
+        counterparty: pendingTransfer.toWallet,
+        fee: TRANSFER_FEE,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      
+      const tx2 = db.collection("transactions").doc();
+      transaction.set(tx2, {
+        uid: receiverDoc.data().uid,
+        walletNumber: pendingTransfer.toWallet,
+        type: 'TRANSFER_IN',
+        amount: pendingTransfer.amount,
+        counterparty: senderWalletNumber,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    });
+
+    closeModal("confirmTransferModal");
+    showToast("🔄 تم التحويل بنجاح ✅");
+    document.getElementById("transferLookupForm").reset();
+    document.getElementById("transferPin").value = "";
+    pendingTransfer = null;
+
+  } catch (error) {
+    console.error("executeTransfer error:", error);
+    showToast(translateTransferError(error.message), "error");
+  } finally {
+    hideLoader();
+  }
+}
+
+function translateTransferError(message) {
+  const map = { 
+    "insufficient-funds": "❌ الرصيد غير كافٍ",
+    "invalid-pin": "🔑 PIN غير صحيح",
+    "wallet-not-found": "❌ المحفظة غير موجودة",
+    "same-wallet": "⚠️ لا يمكن التحويل لنفس المحفظة",
+    "unauthenticated": "🔒 يجب تسجيل الدخول أولاً"
+  };
+  return map[message] || "⚠️ تعذر إتمام التحويل";
+}
+
+// ==============================================
+// 🔧 QR Code - عرض وتحويل
+// ==============================================
+let qrCodeInstance = null;
+
+function showMyQR() {
+    if (!currentWalletNumber) {
+        showToast("⚠️ يجب تسجيل الدخول أولاً", "error");
+        return;
+    }
+    
+    document.getElementById("qrWalletNumber").textContent = currentWalletNumber;
+    
+    const container = document.getElementById("qrCodeContainer");
+    container.innerHTML = "";
+    
+    try {
+        qrCodeInstance = new QRCode(container, {
+            text: currentWalletNumber,
+            width: 200,
+            height: 200,
+            colorDark: "#F3F2F8",
+            colorLight: "#1E2033",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        openModal("qrModal");
+    } catch (e) {
+        console.error("QR Error:", e);
+        showToast("⚠️ تعذر توليد QR Code", "error");
+    }
+}
+
+// ==============================================
+// 🔧 مسح QR Code
+// ==============================================
+async function scanQRCode() {
+    if (!currentWalletNumber) {
+        showToast("⚠️ يجب تسجيل الدخول أولاً", "error");
+        return;
+    }
+    
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast("⚠️ جهازك لا يدعم الكاميرا", "error");
+        return;
+    }
+    
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "environment" } 
+        });
+        
+        const video = document.createElement("video");
+        video.srcObject = stream;
+        video.setAttribute("playsinline", "true");
+        video.style.cssText = "width:100%;max-width:400px;border-radius:16px;";
+        
+        const container = document.createElement("div");
+        container.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:20px;";
+        container.innerHTML = `
+            <div style="width:100%;max-width:400px;position:relative;">
+                <div style="position:absolute;inset:0;border:3px solid #3FD6C6;border-radius:16px;pointer-events:none;box-shadow:0 0 30px rgba(63,214,198,0.3);"></div>
+                <div id="qrScanVideo" style="width:100%;border-radius:16px;overflow:hidden;"></div>
+            </div>
+            <p style="color:#9C9DB8;margin-top:16px;font-size:14px;">📷 ضع الكود أمام الكاميرا</p>
+            <button onclick="this.parentElement.remove();" style="margin-top:16px;padding:12px 32px;border-radius:12px;background:#F26D6D;color:#fff;font-weight:700;border:none;font-size:16px;">
+                ✖ إلغاء
+            </button>
+        `;
+        document.body.appendChild(container);
+        
+        const videoContainer = container.querySelector("#qrScanVideo");
+        videoContainer.appendChild(video);
+        await video.play();
+        
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        
+        const scanInterval = setInterval(() => {
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                
+                if (code && code.data && code.data.length > 0) {
+                    clearInterval(scanInterval);
+                    stream.getTracks().forEach(track => track.stop());
+                    container.remove();
+                    
+                    const toWallet = code.data.trim();
+                    if (toWallet === currentWalletNumber) {
+                        showToast("⚠️ لا يمكن التحويل لنفس المحفظة", "error");
+                        return;
+                    }
+                    
+                    document.getElementById("toWalletNumber").value = toWallet;
+                    showToast("✅ تم مسح الكود: " + toWallet);
+                    document.getElementById("transferAmount").focus();
+                }
+            }
+        }, 300);
+        
+        // إيقاف المسح بعد 30 ثانية
+        setTimeout(() => {
+            clearInterval(scanInterval);
+            stream.getTracks().forEach(track => track.stop());
+            if (container.parentElement) {
+                container.remove();
+                showToast("⏳ انتهى وقت المسح", "error");
+            }
+        }, 30000);
+        
+    } catch (error) {
+        console.error("❌ Camera error:", error);
+        showToast("⚠️ تعذر فتح الكاميرا - تأكد من السماح بالوصول", "error");
+    }
+}
+
+// ==============================================
+// المتجر (Store)
+// ==============================================
+let selectedProduct = null;
+
+async function loadProducts(containerId, featuredOnly = false) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  try {
+    let query = db.collection("products").where("status", "==", "available");
+    if (featuredOnly) query = query.where("featured", "==", true);
+    const snapshot = await query.limit(20).get();
+
+    if (snapshot.empty) { container.innerHTML = `<p class="empty-state">📭 لا توجد منتجات حالياً</p>`; return; }
+
+    container.innerHTML = snapshot.docs.map((doc) => {
+      const p = doc.data();
+      return `<div class="product-card" onclick="openProductModal('${doc.id}')">
+        <img src="${p.imageUrl || ""}" alt="${p.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23262A42%22 width=%22200%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%239C9DB8%22 font-size=%2224%22%3E📦%3C/text%3E%3C/svg%3E'" />
+        <div class="product-info"><h4>${p.name}</h4><span class="product-price">${formatIQD(p.price)}</span></div>
+      </div>`;
+    }).join("");
+  } catch (e) {
+    console.error("loadProducts error:", e);
+    container.innerHTML = `<p class="empty-state">❌ تعذر تحميل المنتجات</p>`;
+  }
+}
+
+async function openProductModal(productId) {
+  try {
+    const doc = await db.collection("products").doc(productId).get();
+    if (!doc.exists) return;
+    selectedProduct = { id: productId, ...doc.data() };
+
+    document.getElementById("productModalImage").src = selectedProduct.imageUrl || "";
+    document.getElementById("productModalImage").onerror = function() {
+      this.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23262A42%22 width=%22200%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%239C9DB8%22 font-size=%2264%22%3E📦%3C/text%3E%3C/svg%3E';
+    };
+    document.getElementById("productModalName").textContent = selectedProduct.name;
+    document.getElementById("productModalDesc").textContent = selectedProduct.description || "";
+    document.getElementById("productModalPrice").textContent = formatIQD(selectedProduct.price);
+    openModal("productModal");
+  } catch (e) {
+    console.error("openProductModal error:", e);
+    showToast("❌ تعذر تحميل المنتج", "error");
+  }
+}
+
+async function confirmPurchase() {
+  if (!selectedProduct) return;
+  if (!auth.currentUser) {
+    showToast("🔒 يجب تسجيل الدخول أولاً", "error");
+    return;
+  }
+  
+  showLoader();
+  try {
+    const productRef = db.collection("products").doc(selectedProduct.id);
+    const userDoc = await db.collection("users").doc(auth.currentUser.uid).get();
+    const walletNumber = userDoc.data().walletId.split('/')[1];
+    const walletRef = db.collection("wallets").doc(walletNumber);
+
+    await db.runTransaction(async (transaction) => {
+      const productDoc = await transaction.get(productRef);
+      const walletDoc = await transaction.get(walletRef);
+      
+      if (!productDoc.exists) throw new Error("product-not-found");
+      if (productDoc.data().quantity < 1) throw new Error("out-of-stock");
+      
+      const balance = walletDoc.data().balance || 0;
+      if (balance < selectedProduct.price) throw new Error("insufficient-funds");
+      
+      transaction.update(productRef, { 
+        quantity: productDoc.data().quantity - 1 
+      });
+      transaction.update(walletRef, { 
+        balance: balance - selectedProduct.price 
+      });
+      
+      const txRef = db.collection("transactions").doc();
+      transaction.set(txRef, {
+        uid: auth.currentUser.uid,
+        walletNumber: walletNumber,
+        type: 'STORE_PURCHASE',
+        amount: selectedProduct.price,
+        productId: selectedProduct.id,
+        productName: selectedProduct.name,
+        quantity: 1,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    });
+
+    closeModal("productModal");
+    showToast("🛍️ تمت عملية الشراء بنجاح ✅");
+  } catch (error) {
+    console.error("confirmPurchase error:", error);
+    showToast(translatePurchaseError(error.message), "error");
+  } finally {
+    hideLoader();
+  }
+}
+
+function translatePurchaseError(message) {
+  const map = { 
+    "insufficient-funds": "❌ رصيدك غير كافٍ",
+    "out-of-stock": "📦 المنتج غير متوفر حالياً",
+    "unauthenticated": "🔒 يجب تسجيل الدخول أولاً",
+    "product-not-found": "❌ المنتج غير موجود"
+  };
+  return map[message] || "⚠️ تعذر إتمام الشراء";
+}
+
+// ==============================================
+// حسابي (Profile)
+// ==============================================
+async function loadProfile() {
+  if (!currentUserData) {
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        const doc = await db.collection("users").doc(user.uid).get();
+        if (doc.exists) currentUserData = doc.data();
+      } catch (e) { /* ignore */ }
+    }
+    if (!currentUserData) return;
+  }
+  document.getElementById("profileName").textContent = currentUserData.name || "-";
+  document.getElementById("profileEmail").textContent = currentUserData.email || "-";
+  document.getElementById("profileWallet").textContent = currentWalletNumber || "-";
+  document.getElementById("profileJoinDate").textContent = formatDateTime(currentUserData.createdAt);
+}
+
+// ==============================================
+// ربط الأحداث (Event Listeners)
+// ==============================================
+document.addEventListener("DOMContentLoaded", () => {
+
+  document.getElementById("loginForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+    if (!email || !password) {
+      showToast("⚠️ أدخل البريد وكلمة المرور", "error");
+      return;
+    }
+    loginUser(email, password);
+  });
+
+  document.getElementById("registerForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = document.getElementById("registerName").value.trim();
+    const email = document.getElementById("registerEmail").value.trim();
+    const password = document.getElementById("registerPassword").value;
+    const pin = document.getElementById("registerPin").value.trim();
+
+    if (name.length < 2) {
+      showToast("⚠️ الاسم يجب أن يكون حرفين على الأقل", "error");
+      return;
+    }
+    if (!email.includes('@')) {
+      showToast("⚠️ البريد الإلكتروني غير صحيح", "error");
+      return;
+    }
+    if (password.length < 6) {
+      showToast("⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل", "error");
+      return;
+    }
+    if (!/^\d{4,6}$/.test(pin)) {
+      showToast("⚠️ PIN يجب أن يكون 4 إلى 6 أرقام", "error");
+      return;
+    }
+
+    registerUser(name, email, password, pin);
+  });
+
+  document.getElementById("redeemForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const codeInput = document.getElementById("codeInput");
+    const code = codeInput.value.trim().toUpperCase();
+    if (!code) { showToast("⚠️ أدخل الكود أولاً", "error"); return; }
+
+    showLoader();
+    try {
+      const result = await redeemCodeDirectly(code);
+      document.getElementById("successAmount").textContent = formatIQD(result.value);
+      openModal("successModal");
+      codeInput.value = "";
+      showToast("🎉 تم استرداد الكود بنجاح!");
+    } catch (error) {
+      console.error("redeem error:", error);
+      showToast(translateRedeemError(error.message), "error");
+    } finally {
+      hideLoader();
+    }
+  });
+
+  document.getElementById("transferLookupForm").addEventListener("submit", (e) => { 
+    e.preventDefault(); 
+    lookupRecipient();
+  });
+  document.getElementById("transferConfirmForm").addEventListener("submit", (e) => { 
+    e.preventDefault(); 
+    executeTransfer();
+  });
+
+  document.getElementById("productSearch").addEventListener("input", (e) => {
+    const term = e.target.value.trim().toLowerCase();
+    document.querySelectorAll("#productsGrid .product-card").forEach((card) => {
+      const name = card.querySelector("h4")?.textContent?.toLowerCase() || "";
+      card.style.display = name.includes(term) ? "" : "none";
+    });
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", logout);
+
+  let authStateHandled = false;
+
+  auth.onAuthStateChanged(async (user) => {
+    if (isRegistering) return;
+
+    if (user) {
+      showLoader();
+      try {
+        await loadWalletData(user.uid);
+        listenToWalletBalance(currentWalletNumber);
+        navigateTo("home");
+        authStateHandled = true;
+      } catch (err) {
+        console.error("❌ onAuthStateChanged error:", err);
+        setTimeout(async () => {
+          try {
+            await loadWalletData(user.uid);
+            listenToWalletBalance(currentWalletNumber);
+            navigateTo("home");
+          } catch (e) {
+            showToast("❌ تعذر تحميل بيانات حسابك: " + (e.message || "خطأ غير معروف"), "error");
+            auth.signOut();
+          }
+        }, 3000);
+      } finally {
+        hideLoader();
+      }
+    } else {
+      currentWalletNumber = null;
+      currentUserData = null;
+      if (!authStateHandled) {
+        navigateTo("login");
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>
