@@ -159,6 +159,10 @@ input { font-family: inherit; }
 /* QR Code */
 #qrCodeContainer canvas { border-radius: 16px; background: #1E2033; padding: 12px; }
 
+/* Upload button */
+.upload-btn { background: var(--surface-2); color: var(--text-secondary); padding: 10px 16px; border-radius: var(--radius-sm); font-size: 13px; border: 1px dashed var(--text-muted); width: 100%; text-align: center; cursor: pointer; transition: 0.2s; }
+.upload-btn:hover { background: var(--surface); border-color: var(--mix-teal); }
+
 @media (min-width: 600px) {
   .app-container { max-width: 600px; border-inline: 1px solid rgba(255,255,255,0.05); }
   .bottom-nav { max-width: 600px; }
@@ -302,10 +306,18 @@ input { font-family: inherit; }
     <form class="form-page" id="transferLookupForm" style="padding-top:0;">
       <div class="form-group">
         <label>رقم محفظة المستلم</label>
-        <div style="display:flex;gap:8px;">
-          <input type="text" id="toWalletNumber" inputmode="numeric" placeholder="مثال: 1999" required style="flex:1;" />
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="text" id="toWalletNumber" inputmode="numeric" placeholder="مثال: 1999" required style="flex:1;min-width:120px;" />
           <button type="button" onclick="scanQRCode()" class="btn-secondary" style="width:auto;padding:14px 16px;font-size:20px;margin:0;">
             📷
+          </button>
+          <button type="button" onclick="uploadQRImage()" class="btn-secondary" style="width:auto;padding:14px 16px;font-size:20px;margin:0;">
+            🖼️
+          </button>
+        </div>
+        <div style="margin-top:8px;">
+          <button type="button" onclick="uploadQRImage()" class="upload-btn">
+            🖼️ أو ارفع صورة QR Code من المعرض
           </button>
         </div>
       </div>
@@ -992,7 +1004,7 @@ function showMyQR() {
 }
 
 // ==============================================
-// 🔧 مسح QR Code
+// 🔧 مسح QR Code من الكاميرا
 // ==============================================
 async function scanQRCode() {
     if (!currentWalletNumber) {
@@ -1001,7 +1013,7 @@ async function scanQRCode() {
     }
     
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showToast("⚠️ جهازك لا يدعم الكاميرا", "error");
+        showToast("⚠️ الكاميرا غير مدعومة في هذا المتصفح، استخدم رفع الصورة بدلاً من ذلك 🖼️", "error");
         return;
     }
     
@@ -1063,7 +1075,6 @@ async function scanQRCode() {
             }
         }, 300);
         
-        // إيقاف المسح بعد 30 ثانية
         setTimeout(() => {
             clearInterval(scanInterval);
             stream.getTracks().forEach(track => track.stop());
@@ -1075,8 +1086,68 @@ async function scanQRCode() {
         
     } catch (error) {
         console.error("❌ Camera error:", error);
-        showToast("⚠️ تعذر فتح الكاميرا - تأكد من السماح بالوصول", "error");
+        showToast("⚠️ تعذر فتح الكاميرا - استخدم رفع الصورة بدلاً من ذلك 🖼️", "error");
     }
+}
+
+// ==============================================
+// 🔧 مسح QR Code من الصورة (بديل الكاميرا) 🆕
+// ==============================================
+function uploadQRImage() {
+    if (!currentWalletNumber) {
+        showToast("⚠️ يجب تسجيل الدخول أولاً", "error");
+        return;
+    }
+    
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        showLoader();
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                try {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+                    
+                    if (code && code.data && code.data.length > 0) {
+                        const toWallet = code.data.trim();
+                        if (toWallet === currentWalletNumber) {
+                            showToast("⚠️ لا يمكن التحويل لنفس المحفظة", "error");
+                            hideLoader();
+                            return;
+                        }
+                        document.getElementById("toWalletNumber").value = toWallet;
+                        showToast("✅ تم مسح الكود: " + toWallet);
+                        document.getElementById("transferAmount").focus();
+                    } else {
+                        showToast("❌ لم يتم العثور على QR Code في الصورة", "error");
+                    }
+                } catch (err) {
+                    console.error("QR Scan error:", err);
+                    showToast("❌ تعذر قراءة الصورة", "error");
+                }
+                hideLoader();
+            };
+            img.onerror = function() {
+                showToast("❌ تعذر تحميل الصورة", "error");
+                hideLoader();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    };
+    input.click();
 }
 
 // ==============================================
