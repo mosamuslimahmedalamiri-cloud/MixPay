@@ -5,13 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>MixPay - ميكس باي</title>
 
-<!-- ===== مكتبات QR Code ===== -->
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-
 <style>
 /* ==============================================
-   MixPay - Design System
+   MixPay - Design System (نسخة مبسطة بدون QR)
    ============================================== */
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@400;500;600;700&display=swap');
 
@@ -35,7 +31,7 @@
   --radius-sm: 10px;
   --radius-md: 16px;
   --radius-lg: 24px;
-  --nav-height: 68px;
+  --nav-height: 80px;
   --shadow-card: 0 8px 30px rgba(0,0,0,0.35);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -58,26 +54,38 @@ input { font-family: inherit; }
 .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 8px; }
 .brand { font-family: var(--font-display); font-weight: 900; font-size: 26px; background: var(--grad-mix); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: 0.5px; }
 .brand-tagline { font-size: 11px; color: var(--text-muted); letter-spacing: 1px; }
-.icon-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 18px; transition: transform 0.15s ease, background 0.2s ease; }
-.icon-btn:active { transform: scale(0.92); background: var(--surface-2); }
+.icon-btn { width: 42px; height: 42px; border-radius: 50%; background: var(--surface); border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 18px; position: relative; overflow: hidden; isolation: isolate; box-shadow: 0 4px 14px rgba(0,0,0,0.25); transition: transform 0.18s cubic-bezier(.34,1.56,.64,1), background 0.2s ease, box-shadow 0.2s ease, border-color .2s ease; }
+.icon-btn:active { transform: scale(0.9); background: var(--surface-2); }
+.icon-btn:hover { border-color: rgba(123,108,246,0.35); box-shadow: 0 6px 18px rgba(123,108,246,0.22); }
 
-.wallet-card { margin: 12px 20px 20px; padding: 24px; border-radius: var(--radius-lg); background: var(--grad-mix); position: relative; overflow: hidden; box-shadow: 0 15px 40px rgba(123, 108, 246, 0.28); }
+.wallet-card { margin: 12px 20px 20px; padding: 26px 24px; border-radius: var(--radius-lg); background: var(--grad-mix); position: relative; overflow: hidden; box-shadow: 0 18px 46px rgba(123, 108, 246, 0.32), 0 2px 0 rgba(255,255,255,0.12) inset; border: 1px solid rgba(255,255,255,0.14); }
 .wallet-card::before { content: ""; position: absolute; inset: -40% -20% auto auto; width: 220px; height: 220px; background: radial-gradient(circle, rgba(255,255,255,0.25), transparent 70%); border-radius: 50%; animation: floatBlob 8s ease-in-out infinite; }
 .wallet-card::after { content: ""; position: absolute; inset: auto auto -30% -10%; width: 180px; height: 180px; background: radial-gradient(circle, rgba(232,180,92,0.35), transparent 70%); border-radius: 50%; animation: floatBlob 10s ease-in-out infinite reverse; }
+.wallet-card .card-shine { content: ""; position: absolute; top: 0; left: -60%; width: 45%; height: 100%; background: linear-gradient(115deg, transparent, rgba(255,255,255,0.16), transparent); transform: skewX(-18deg); animation: shineSweep 5.5s ease-in-out infinite; pointer-events: none; }
+@keyframes shineSweep { 0% { left: -60%; } 35%, 100% { left: 140%; } }
 @keyframes floatBlob { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-10px, 10px) scale(1.08); } }
-.wallet-label { font-size: 13px; opacity: 0.85; position: relative; z-index: 1; }
-.wallet-balance { font-family: var(--font-display); font-weight: 900; font-size: 36px; margin: 6px 0 18px; position: relative; z-index: 1; }
-.wallet-number-row { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.18); backdrop-filter: blur(6px); padding: 10px 14px; border-radius: var(--radius-sm); position: relative; z-index: 1; width: fit-content; }
+.wallet-label { font-size: 13px; opacity: 0.85; position: relative; z-index: 1; letter-spacing: .2px; }
+.wallet-balance { font-family: var(--font-display); font-weight: 900; font-size: 37px; margin: 6px 0 18px; position: relative; z-index: 1; text-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+.wallet-number-row { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.2); backdrop-filter: blur(6px); padding: 10px 14px; border-radius: 999px; position: relative; z-index: 1; width: fit-content; border: 1px solid rgba(255,255,255,0.12); }
 .wallet-number-row span:first-child { font-size: 13px; opacity: 0.8; }
-.wallet-number { font-weight: 700; letter-spacing: 1px; }
-.copy-btn { font-size: 15px; opacity: 0.9; transition: transform 0.15s ease; }
-.copy-btn:active { transform: scale(0.85); }
+.wallet-number { font-weight: 700; letter-spacing: 1.5px; }
+.copy-btn { font-size: 15px; opacity: 0.9; transition: transform 0.15s cubic-bezier(.34,1.56,.64,1); }
+.copy-btn:active { transform: scale(0.8) rotate(-8deg); }
 
-.quick-actions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 0 20px; margin-bottom: 24px; }
-.quick-action { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 4px; border-radius: var(--radius-md); background: var(--surface); transition: transform 0.15s ease, background 0.2s ease; }
-.quick-action:active { transform: scale(0.94); background: var(--surface-2); }
-.quick-action .qa-icon { font-size: 20px; }
-.quick-action .qa-label { font-size: 11px; color: var(--text-secondary); text-align: center; }
+.quick-actions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 0 20px; margin-bottom: 26px; }
+.quick-action { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 4px 12px; border-radius: var(--radius-md); background: var(--surface); border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; isolation: isolate; transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), background 0.2s ease, border-color .2s ease, box-shadow .25s ease; animation: qaIn .5s cubic-bezier(.2,.8,.2,1) backwards; }
+.quick-action:nth-child(1) { animation-delay: .02s; } .quick-action:nth-child(2) { animation-delay: .07s; } .quick-action:nth-child(3) { animation-delay: .12s; } .quick-action:nth-child(4) { animation-delay: .17s; } .quick-action:nth-child(5) { animation-delay: .22s; }
+@keyframes qaIn { from { opacity: 0; transform: translateY(10px) scale(.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.quick-action:active { transform: scale(0.92) translateY(1px); }
+.quick-action:hover { border-color: rgba(255,255,255,0.12); box-shadow: 0 10px 22px rgba(0,0,0,0.3); }
+.quick-action .qa-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; background: var(--grad-mix); box-shadow: 0 6px 16px rgba(123,108,246,0.35); transition: transform .2s ease; }
+.quick-action:active .qa-icon { transform: scale(0.88); }
+.quick-action .qa-label { font-size: 11px; color: var(--text-secondary); text-align: center; font-weight: 500; }
+.quick-action:nth-child(1) .qa-icon { background: linear-gradient(135deg,#E8B45C,#F2915C); box-shadow: 0 6px 16px rgba(232,180,92,0.35); }
+.quick-action:nth-child(2) .qa-icon { background: linear-gradient(135deg,#7B6CF6,#A084F2); box-shadow: 0 6px 16px rgba(123,108,246,0.4); }
+.quick-action:nth-child(3) .qa-icon { background: linear-gradient(135deg,#3FD6C6,#4FC1E9); box-shadow: 0 6px 16px rgba(63,214,198,0.35); }
+.quick-action:nth-child(4) .qa-icon { background: linear-gradient(135deg,#F26D9C,#F6935C); box-shadow: 0 6px 16px rgba(242,109,156,0.32); }
+.quick-action:nth-child(5) .qa-icon { background: linear-gradient(135deg,#6C7BF6,#3FD6C6); box-shadow: 0 6px 16px rgba(108,123,246,0.32); }
 
 .section-title { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; margin-bottom: 12px; }
 .section-title h3 { font-family: var(--font-display); font-size: 16px; font-weight: 700; }
@@ -86,29 +94,40 @@ input { font-family: inherit; }
 .products-scroll, .products-grid { display: grid; gap: 12px; padding: 0 20px; margin-bottom: 28px; }
 .products-scroll { grid-auto-flow: column; grid-auto-columns: 140px; overflow-x: auto; padding-bottom: 6px; }
 .products-grid { grid-template-columns: 1fr 1fr; }
-.product-card { background: var(--surface); border-radius: var(--radius-md); overflow: hidden; transition: transform 0.15s ease; }
-.product-card:active { transform: scale(0.97); }
-.product-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; background: var(--surface-2); }
-.product-info { padding: 10px 12px; }
-.product-info h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-.product-price { font-size: 13px; color: var(--gold); font-weight: 700; }
+.product-card { background: var(--surface); border-radius: var(--radius-md); overflow: hidden; border: 1px solid rgba(255,255,255,0.05); transition: transform 0.2s cubic-bezier(.34,1.4,.64,1), box-shadow .25s ease, border-color .25s ease; }
+.product-card:active { transform: scale(0.96); }
+.product-card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(0,0,0,0.35); border-color: rgba(232,180,92,0.25); }
+.product-card .product-img-wrap { position: relative; overflow: hidden; }
+.product-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; background: var(--surface-2); display: block; transition: transform .35s ease; }
+.product-card:hover img { transform: scale(1.06); }
+.product-card .product-img-wrap::after { content: ""; position: absolute; inset: auto 0 0 0; height: 45%; background: linear-gradient(to top, rgba(14,15,26,0.55), transparent); pointer-events: none; }
+.product-info { padding: 11px 12px 13px; }
+.product-info h4 { font-size: 13px; font-weight: 600; margin-bottom: 6px; line-height: 1.35; }
+.product-price { font-size: 12.5px; color: var(--ink); font-weight: 800; background: linear-gradient(135deg, var(--gold), #F2C97C); padding: 4px 10px; border-radius: 999px; display: inline-block; box-shadow: 0 4px 10px rgba(232,180,92,0.3); }
 
-.transactions-list { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
-.transaction-item { display: flex; align-items: center; gap: 12px; background: var(--surface); border-radius: var(--radius-md); padding: 12px 14px; }
-.tx-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 17px; }
-.tx-info { flex: 1; display: flex; flex-direction: column; }
+.transactions-list { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+.transaction-item { display: flex; align-items: center; gap: 12px; background: var(--surface); border-radius: var(--radius-md); padding: 13px 14px; border: 1px solid rgba(255,255,255,0.04); transition: transform .18s ease, border-color .2s ease, background .2s ease; }
+.transaction-item:hover { transform: translateX(-2px); border-color: rgba(255,255,255,0.1); background: var(--surface-2); }
+.tx-icon { width: 42px; height: 42px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 17px; border: 1px solid rgba(255,255,255,0.06); }
+.tx-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
 .tx-title { font-size: 13.5px; font-weight: 600; }
 .tx-date { font-size: 11px; color: var(--text-muted); }
-.tx-amount { font-weight: 700; font-size: 14px; }
+.tx-amount { font-weight: 800; font-size: 14px; }
 .tx-amount.positive { color: var(--success); }
 .tx-amount.negative { color: var(--danger); }
-.empty-state { color: var(--text-muted); font-size: 13px; text-align: center; padding: 30px 0; }
+.transaction-item:has(.tx-amount.positive) .tx-icon { background: rgba(63,214,198,0.14); box-shadow: 0 0 0 1px rgba(63,214,198,0.18) inset; }
+.transaction-item:has(.tx-amount.negative) .tx-icon { background: rgba(242,109,109,0.12); box-shadow: 0 0 0 1px rgba(242,109,109,0.16) inset; }
+.empty-state { color: var(--text-muted); font-size: 13px; text-align: center; padding: 34px 0; }
 
-.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; height: var(--nav-height); background: var(--bg-elevated); border-top: 1px solid rgba(255,255,255,0.06); display: none; align-items: center; justify-content: space-around; z-index: 50; }
+.bottom-nav { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); width: calc(100% - 24px); max-width: 456px; height: 64px; background: rgba(23,24,38,0.82); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.08); border-radius: 22px; display: none; align-items: center; justify-content: space-around; z-index: 50; box-shadow: 0 12px 34px rgba(0,0,0,0.45); }
 .bottom-nav.active-nav { display: flex; }
-.bottom-nav a { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--text-muted); font-size: 10.5px; transition: color 0.2s ease; }
-.bottom-nav a .nav-icon { font-size: 20px; }
+.bottom-nav a { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--text-muted); font-size: 10.5px; font-weight: 500; padding: 6px 10px; border-radius: 14px; position: relative; transition: color 0.25s ease, transform .2s cubic-bezier(.34,1.56,.64,1); }
+.bottom-nav a:active { transform: scale(0.9); }
+.bottom-nav a .nav-icon { font-size: 19px; transition: transform .25s cubic-bezier(.34,1.56,.64,1); }
 .bottom-nav a.active { color: var(--mix-teal); }
+.bottom-nav a.active .nav-icon { transform: translateY(-2px) scale(1.1); }
+.bottom-nav a.active::before { content: ""; position: absolute; top: -2px; width: 5px; height: 5px; border-radius: 50%; background: var(--mix-teal); box-shadow: 0 0 8px var(--mix-teal); animation: navDot .3s ease; }
+@keyframes navDot { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
 
 .page-header { padding: 20px 20px 12px; display: flex; align-items: center; gap: 12px; }
 .page-header h2 { font-family: var(--font-display); font-size: 19px; font-weight: 700; }
@@ -116,15 +135,23 @@ input { font-family: inherit; }
 .form-page { padding: 20px; }
 .form-group { margin-bottom: 16px; }
 .form-group label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
-.form-group input, .form-group textarea { width: 100%; padding: 14px 16px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.08); background: var(--surface); color: var(--text-primary); font-size: 15px; outline: none; transition: border-color 0.2s ease; }
-.form-group input:focus, .form-group textarea:focus { border-color: var(--mix-teal); }
+.form-group input, .form-group textarea { width: 100%; padding: 14px 16px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.08); background: var(--surface); color: var(--text-primary); font-size: 15px; outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+.form-group input:focus, .form-group textarea:focus { border-color: var(--mix-teal); box-shadow: 0 0 0 4px rgba(63,214,198,0.14); }
 .form-group input::placeholder { color: var(--text-muted); }
 
-.btn-primary { width: 100%; padding: 16px; border-radius: var(--radius-md); background: var(--grad-mix); color: #fff; font-weight: 700; font-size: 15px; text-align: center; transition: transform 0.15s ease, opacity 0.2s ease; }
-.btn-primary:active { transform: scale(0.98); }
+.btn-primary { width: 100%; padding: 17px; border-radius: var(--radius-md); background: var(--grad-mix); color: #fff; font-weight: 700; font-size: 15px; text-align: center; position: relative; overflow: hidden; isolation: isolate; letter-spacing: .2px; box-shadow: 0 10px 26px rgba(123,108,246,0.35), 0 1px 0 rgba(255,255,255,0.2) inset; border: 1px solid rgba(255,255,255,0.08); transition: transform 0.16s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s ease, opacity 0.2s ease; }
+.btn-primary::before { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.28) 48%, transparent 66%); background-size: 220% 100%; background-position: 120% 0; transition: background-position .7s ease; pointer-events: none; }
+.btn-primary:hover::before { background-position: -20% 0; }
+.btn-primary:hover { box-shadow: 0 14px 32px rgba(123,108,246,0.45), 0 1px 0 rgba(255,255,255,0.2) inset; }
+.btn-primary:active { transform: scale(0.97); box-shadow: 0 6px 16px rgba(123,108,246,0.3); }
 .btn-primary:disabled { opacity: 0.5; }
-.btn-secondary { width: 100%; padding: 14px; border-radius: var(--radius-md); background: var(--surface); color: var(--text-primary); font-weight: 600; font-size: 14px; text-align: center; border: 1px solid rgba(255,255,255,0.06); transition: background 0.2s ease; }
-.btn-secondary:active { background: var(--surface-2); }
+.btn-secondary { width: 100%; padding: 15px; border-radius: var(--radius-md); background: var(--surface); color: var(--text-primary); font-weight: 600; font-size: 14px; text-align: center; border: 1px solid rgba(255,255,255,0.08); position: relative; overflow: hidden; transition: background 0.2s ease, border-color .2s ease, transform .16s cubic-bezier(.34,1.56,.64,1); }
+.btn-secondary:hover { border-color: rgba(255,255,255,0.18); background: var(--surface-2); }
+.btn-secondary:active { transform: scale(0.97); background: var(--surface-2); }
+
+/* Ripple effect shared by interactive elements */
+.ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.45); transform: scale(0); animation: rippleAnim .6s ease-out forwards; pointer-events: none; }
+@keyframes rippleAnim { to { transform: scale(2.6); opacity: 0; } }
 
 .form-footer-link { text-align: center; font-size: 13px; color: var(--text-secondary); margin-top: 20px; }
 .form-footer-link a { color: var(--mix-teal); font-weight: 600; cursor: pointer; }
@@ -154,67 +181,13 @@ input { font-family: inherit; }
 .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.15); border-top-color: var(--mix-teal); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.glass-card { background: rgba(30,32,51,0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-lg); padding: 18px; }
+.glass-card { background: rgba(30,32,51,0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-lg); padding: 18px; box-shadow: 0 10px 26px rgba(0,0,0,0.25); }
 
-/* QR Code */
-#qrCodeContainer canvas { border-radius: 16px; background: #1E2033; padding: 12px; }
-
-/* Upload button */
-.upload-btn { background: var(--surface-2); color: var(--text-secondary); padding: 10px 16px; border-radius: var(--radius-sm); font-size: 13px; border: 1px dashed var(--text-muted); width: 100%; text-align: center; cursor: pointer; transition: 0.2s; }
-.upload-btn:hover { background: var(--surface); border-color: var(--mix-teal); }
-
-/* QR Scanner Overlay */
-#qrScannerOverlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.95);
-    z-index: 9999;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-#qrScannerOverlay.active {
-    display: flex;
-}
-#qrCamera {
-    width: 100%;
-    max-width: 400px;
-    border-radius: 16px;
-    background: #000;
-}
-.scanner-frame {
-    width: 100%;
-    max-width: 400px;
-    position: relative;
-}
-.scanner-frame::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border: 3px solid #3FD6C6;
-    border-radius: 16px;
-    pointer-events: none;
-    box-shadow: 0 0 30px rgba(63,214,198,0.3);
-    z-index: 10;
-}
-.scanner-cancel {
-    margin-top: 16px;
-    padding: 12px 32px;
-    border-radius: 12px;
-    background: #F26D6D;
-    color: #fff;
-    font-weight: 700;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-}
-.scanner-hint {
-    color: #9C9DB8;
-    margin-top: 16px;
-    font-size: 14px;
-}
+/* Section title accent */
+.section-title h3 { position: relative; padding-inline-start: 12px; }
+.section-title h3::before { content: ""; position: absolute; inset-inline-start: 0; top: 3px; bottom: 3px; width: 3px; border-radius: 3px; background: var(--grad-mix); }
+.section-title a { font-weight: 600; transition: opacity .2s ease; }
+.section-title a:active { opacity: .6; }
 
 @media (min-width: 600px) {
   .app-container { max-width: 600px; border-inline: 1px solid rgba(255,255,255,0.05); }
@@ -224,7 +197,7 @@ input { font-family: inherit; }
 @media (min-width: 1024px) {
   body { display: flex; justify-content: center; background: var(--ink); padding-bottom: 0; }
   .app-container { max-width: 480px; margin: 24px 0; border-radius: 32px; overflow: hidden; min-height: calc(100vh - 48px); box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
-  .bottom-nav { position: absolute; max-width: 480px; border-radius: 0 0 32px 32px; }
+  .bottom-nav { position: absolute; max-width: 456px; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
@@ -349,30 +322,10 @@ input { font-family: inherit; }
       <div class="wallet-balance js-balance" style="font-size:26px;">0 د.ع</div>
     </div>
     
-    <!-- زر عرض QR Code -->
-    <div style="padding:0 20px 12px;">
-      <button class="btn-secondary" onclick="showMyQR()" style="margin-bottom:0;">
-        📱 عرض QR Code محفظتي
-      </button>
-    </div>
-    
     <form class="form-page" id="transferLookupForm" style="padding-top:0;">
       <div class="form-group">
         <label>رقم محفظة المستلم</label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <input type="text" id="toWalletNumber" inputmode="numeric" placeholder="مثال: 1999" required style="flex:1;min-width:120px;" />
-          <button type="button" onclick="openQRScanner()" class="btn-secondary" style="width:auto;padding:14px 16px;font-size:20px;margin:0;">
-            📷
-          </button>
-          <button type="button" onclick="uploadQRImage()" class="btn-secondary" style="width:auto;padding:14px 16px;font-size:20px;margin:0;">
-            🖼️
-          </button>
-        </div>
-        <div style="margin-top:8px;">
-          <button type="button" onclick="uploadQRImage()" class="upload-btn">
-            🖼️ أو ارفع صورة QR Code من المعرض
-          </button>
-        </div>
+        <input type="text" id="toWalletNumber" inputmode="numeric" placeholder="مثال: 1999" required />
       </div>
       <div class="form-group">
         <label>المبلغ (د.ع)</label>
@@ -498,34 +451,6 @@ input { font-family: inherit; }
   </div>
 </div>
 
-<!-- ============ نافذة: QR Code ============ -->
-<div class="modal-overlay" id="qrModal">
-  <div class="modal-sheet" style="text-align:center;">
-    <div class="modal-handle"></div>
-    <div class="modal-title">📱 رمز محفظتي</div>
-    <p style="color:var(--text-secondary);font-size:13px;margin-bottom:14px;">
-      امسح الكود لتحويل المال إليّ
-    </p>
-    <div id="qrCodeContainer" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
-    <div class="confirm-row">
-      <span>رقم المحفظة</span>
-      <span id="qrWalletNumber">-</span>
-    </div>
-    <button class="btn-primary" onclick="closeModal('qrModal')">تم</button>
-    <button class="btn-secondary" style="margin-top:10px;" onclick="closeModal('qrModal')">إغلاق</button>
-  </div>
-</div>
-
-<!-- ============ ماسح QR Code ============ -->
-<div id="qrScannerOverlay">
-    <div class="scanner-frame">
-        <video id="qrCamera" autoplay playsinline></video>
-    </div>
-    <p class="scanner-hint">📷 ضع الكود أمام الكاميرا</p>
-    <button class="scanner-cancel" onclick="closeQRScanner()">✖ إلغاء</button>
-    <canvas id="qrCanvas" style="display:none;"></canvas>
-</div>
-
 <!-- ============ Firebase SDK ============ -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -594,6 +519,39 @@ async function copyToClipboard(text) {
 function openModal(id) { const m = document.getElementById(id); if (m) m.classList.add("open"); }
 function closeModal(id) { const m = document.getElementById(id); if (m) m.classList.remove("open"); }
 
+// ==============================================
+// مؤثر Ripple بصري عند الضغط على العناصر التفاعلية
+// ==============================================
+function attachRipple(selector) {
+  document.querySelectorAll(selector).forEach((el) => {
+    if (el.dataset.rippleBound) return;
+    el.dataset.rippleBound = "1";
+    el.style.position = el.style.position || "relative";
+    el.style.overflow = "hidden";
+    el.addEventListener("pointerdown", (e) => {
+      const rect = el.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height) * 1.2;
+      const span = document.createElement("span");
+      span.className = "ripple";
+      span.style.width = span.style.height = size + "px";
+      span.style.left = (e.clientX - rect.left - size / 2) + "px";
+      span.style.top = (e.clientY - rect.top - size / 2) + "px";
+      el.appendChild(span);
+      setTimeout(() => span.remove(), 650);
+    });
+  });
+}
+function initVisualEffects() {
+  attachRipple(".btn-primary, .btn-secondary, .quick-action, .icon-btn, .product-card, .bottom-nav a");
+  document.querySelectorAll(".wallet-card").forEach((card) => {
+    if (!card.querySelector(".card-shine")) {
+      const shine = document.createElement("div");
+      shine.className = "card-shine";
+      card.appendChild(shine);
+    }
+  });
+}
+
 function formatDateTime(timestamp) {
   if (!timestamp) return "-";
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -626,6 +584,7 @@ function navigateTo(viewName) {
   if (viewName === "profile") { loadProfile(); }
 
   window.scrollTo(0, 0);
+  setTimeout(initVisualEffects, 60);
 }
 
 // ==============================================
@@ -1035,200 +994,6 @@ function translateTransferError(message) {
 }
 
 // ==============================================
-// 🔧 QR Code - عرض وتحويل
-// ==============================================
-let qrCodeInstance = null;
-
-function showMyQR() {
-    if (!currentWalletNumber) {
-        showToast("⚠️ يجب تسجيل الدخول أولاً", "error");
-        return;
-    }
-    
-    document.getElementById("qrWalletNumber").textContent = currentWalletNumber;
-    
-    const container = document.getElementById("qrCodeContainer");
-    container.innerHTML = "";
-    
-    try {
-        qrCodeInstance = new QRCode(container, {
-            text: currentWalletNumber,
-            width: 200,
-            height: 200,
-            colorDark: "#F3F2F8",
-            colorLight: "#1E2033",
-            correctLevel: QRCode.CorrectLevel.H
-        });
-        openModal("qrModal");
-    } catch (e) {
-        console.error("QR Error:", e);
-        showToast("⚠️ تعذر توليد QR Code", "error");
-    }
-}
-
-// ==============================================
-// 🔧 مسح QR Code من الكاميرا
-// ==============================================
-let qrStream = null;
-let qrScanInterval = null;
-
-async function openQRScanner() {
-    if (!currentWalletNumber) {
-        showToast("⚠️ يجب تسجيل الدخول أولاً", "error");
-        return;
-    }
-    
-    try {
-        const overlay = document.getElementById("qrScannerOverlay");
-        overlay.classList.add("active");
-        
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" },
-            audio: false
-        });
-        
-        qrStream = stream;
-        const video = document.getElementById("qrCamera");
-        video.srcObject = stream;
-        await video.play();
-        
-        startQRScanning();
-        
-    } catch (error) {
-        console.error("❌ Camera error:", error);
-        showToast("⚠️ تعذر فتح الكاميرا - استخدم رفع الصورة بدلاً من ذلك 🖼️", "error");
-        closeQRScanner();
-    }
-}
-
-function closeQRScanner() {
-    if (qrStream) {
-        qrStream.getTracks().forEach(track => track.stop());
-        qrStream = null;
-    }
-    if (qrScanInterval) {
-        clearInterval(qrScanInterval);
-        qrScanInterval = null;
-    }
-    document.getElementById("qrScannerOverlay").classList.remove("active");
-    const video = document.getElementById("qrCamera");
-    video.srcObject = null;
-}
-
-function startQRScanning() {
-    const video = document.getElementById("qrCamera");
-    const canvas = document.getElementById("qrCanvas");
-    const ctx = canvas.getContext("2d");
-    
-    if (qrScanInterval) clearInterval(qrScanInterval);
-    
-    qrScanInterval = setInterval(() => {
-        if (video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imageData.data, imageData.width, imageData.height);
-            
-            if (code && code.data && code.data.length > 0) {
-                const walletNumber = code.data.trim();
-                
-                if (/^\d{4,10}$/.test(walletNumber)) {
-                    clearInterval(qrScanInterval);
-                    qrScanInterval = null;
-                    
-                    if (qrStream) {
-                        qrStream.getTracks().forEach(track => track.stop());
-                        qrStream = null;
-                    }
-                    document.getElementById("qrScannerOverlay").classList.remove("active");
-                    document.getElementById("qrCamera").srcObject = null;
-                    
-                    if (walletNumber === currentWalletNumber) {
-                        showToast("⚠️ لا يمكن التحويل لنفس المحفظة", "error");
-                        return;
-                    }
-                    
-                    document.getElementById("toWalletNumber").value = walletNumber;
-                    showToast("✅ تم مسح الكود: " + walletNumber);
-                    document.getElementById("transferAmount").focus();
-                }
-            }
-        }
-    }, 300);
-    
-    setTimeout(() => {
-        if (qrScanInterval) {
-            clearInterval(qrScanInterval);
-            qrScanInterval = null;
-            showToast("⏳ انتهى وقت المسح", "error");
-            closeQRScanner();
-        }
-    }, 30000);
-}
-
-// ==============================================
-// 🔧 مسح QR Code من الصورة (بديل الكاميرا)
-// ==============================================
-function uploadQRImage() {
-    if (!currentWalletNumber) {
-        showToast("⚠️ يجب تسجيل الدخول أولاً", "error");
-        return;
-    }
-    
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = function(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        showLoader();
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                try {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    ctx.drawImage(img, 0, 0);
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const code = jsQR(imageData.data, imageData.width, imageData.height);
-                    
-                    if (code && code.data && code.data.length > 0) {
-                        const walletNumber = code.data.trim();
-                        if (walletNumber === currentWalletNumber) {
-                            showToast("⚠️ لا يمكن التحويل لنفس المحفظة", "error");
-                            hideLoader();
-                            return;
-                        }
-                        document.getElementById("toWalletNumber").value = walletNumber;
-                        showToast("✅ تم مسح الكود: " + walletNumber);
-                        document.getElementById("transferAmount").focus();
-                    } else {
-                        showToast("❌ لم يتم العثور على QR Code في الصورة", "error");
-                    }
-                } catch (err) {
-                    console.error("QR Scan error:", err);
-                    showToast("❌ تعذر قراءة الصورة", "error");
-                }
-                hideLoader();
-            };
-            img.onerror = function() {
-                showToast("❌ تعذر تحميل الصورة", "error");
-                hideLoader();
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    };
-    input.click();
-}
-
-// ==============================================
 // المتجر (Store)
 // ==============================================
 let selectedProduct = null;
@@ -1247,10 +1012,11 @@ async function loadProducts(containerId, featuredOnly = false) {
     container.innerHTML = snapshot.docs.map((doc) => {
       const p = doc.data();
       return `<div class="product-card" onclick="openProductModal('${doc.id}')">
-        <img src="${p.imageUrl || ""}" alt="${p.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23262A42%22 width=%22200%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%239C9DB8%22 font-size=%2224%22%3E📦%3C/text%3E%3C/svg%3E'" />
+        <div class="product-img-wrap"><img src="${p.imageUrl || ""}" alt="${p.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23262A42%22 width=%22200%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%239C9DB8%22 font-size=%2224%22%3E📦%3C/text%3E%3C/svg%3E'" /></div>
         <div class="product-info"><h4>${p.name}</h4><span class="product-price">${formatIQD(p.price)}</span></div>
       </div>`;
     }).join("");
+    attachRipple("#" + containerId + " .product-card");
   } catch (e) {
     console.error("loadProducts error:", e);
     container.innerHTML = `<p class="empty-state">❌ تعذر تحميل المنتجات</p>`;
@@ -1365,6 +1131,7 @@ async function loadProfile() {
 // ربط الأحداث (Event Listeners)
 // ==============================================
 document.addEventListener("DOMContentLoaded", () => {
+  initVisualEffects();
 
   document.getElementById("loginForm").addEventListener("submit", (e) => {
     e.preventDefault();
