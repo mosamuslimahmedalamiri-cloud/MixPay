@@ -163,6 +163,59 @@ input { font-family: inherit; }
 .upload-btn { background: var(--surface-2); color: var(--text-secondary); padding: 10px 16px; border-radius: var(--radius-sm); font-size: 13px; border: 1px dashed var(--text-muted); width: 100%; text-align: center; cursor: pointer; transition: 0.2s; }
 .upload-btn:hover { background: var(--surface); border-color: var(--mix-teal); }
 
+/* QR Scanner Overlay */
+#qrScannerOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+#qrScannerOverlay.active {
+    display: flex;
+}
+#qrCamera {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 16px;
+    background: #000;
+}
+.scanner-frame {
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+}
+.scanner-frame::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 3px solid #3FD6C6;
+    border-radius: 16px;
+    pointer-events: none;
+    box-shadow: 0 0 30px rgba(63,214,198,0.3);
+    z-index: 10;
+}
+.scanner-cancel {
+    margin-top: 16px;
+    padding: 12px 32px;
+    border-radius: 12px;
+    background: #F26D6D;
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+.scanner-hint {
+    color: #9C9DB8;
+    margin-top: 16px;
+    font-size: 14px;
+}
+
 @media (min-width: 600px) {
   .app-container { max-width: 600px; border-inline: 1px solid rgba(255,255,255,0.05); }
   .bottom-nav { max-width: 600px; }
@@ -308,7 +361,7 @@ input { font-family: inherit; }
         <label>رقم محفظة المستلم</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <input type="text" id="toWalletNumber" inputmode="numeric" placeholder="مثال: 1999" required style="flex:1;min-width:120px;" />
-          <button type="button" onclick="scanQRCode()" class="btn-secondary" style="width:auto;padding:14px 16px;font-size:20px;margin:0;">
+          <button type="button" onclick="openQRScanner()" class="btn-secondary" style="width:auto;padding:14px 16px;font-size:20px;margin:0;">
             📷
           </button>
           <button type="button" onclick="uploadQRImage()" class="btn-secondary" style="width:auto;padding:14px 16px;font-size:20px;margin:0;">
@@ -461,6 +514,16 @@ input { font-family: inherit; }
     <button class="btn-primary" onclick="closeModal('qrModal')">تم</button>
     <button class="btn-secondary" style="margin-top:10px;" onclick="closeModal('qrModal')">إغلاق</button>
   </div>
+</div>
+
+<!-- ============ ماسح QR Code ============ -->
+<div id="qrScannerOverlay">
+    <div class="scanner-frame">
+        <video id="qrCamera" autoplay playsinline></video>
+    </div>
+    <p class="scanner-hint">📷 ضع الكود أمام الكاميرا</p>
+    <button class="scanner-cancel" onclick="closeQRScanner()">✖ إلغاء</button>
+    <canvas id="qrCanvas" style="display:none;"></canvas>
 </div>
 
 <!-- ============ Firebase SDK ============ -->
@@ -1006,92 +1069,107 @@ function showMyQR() {
 // ==============================================
 // 🔧 مسح QR Code من الكاميرا
 // ==============================================
-async function scanQRCode() {
+let qrStream = null;
+let qrScanInterval = null;
+
+async function openQRScanner() {
     if (!currentWalletNumber) {
         showToast("⚠️ يجب تسجيل الدخول أولاً", "error");
         return;
     }
     
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showToast("⚠️ الكاميرا غير مدعومة في هذا المتصفح، استخدم رفع الصورة بدلاً من ذلك 🖼️", "error");
-        return;
-    }
-    
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: "environment" } 
+        const overlay = document.getElementById("qrScannerOverlay");
+        overlay.classList.add("active");
+        
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" },
+            audio: false
         });
         
-        const video = document.createElement("video");
+        qrStream = stream;
+        const video = document.getElementById("qrCamera");
         video.srcObject = stream;
-        video.setAttribute("playsinline", "true");
-        video.style.cssText = "width:100%;max-width:400px;border-radius:16px;";
-        
-        const container = document.createElement("div");
-        container.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:20px;";
-        container.innerHTML = `
-            <div style="width:100%;max-width:400px;position:relative;">
-                <div style="position:absolute;inset:0;border:3px solid #3FD6C6;border-radius:16px;pointer-events:none;box-shadow:0 0 30px rgba(63,214,198,0.3);"></div>
-                <div id="qrScanVideo" style="width:100%;border-radius:16px;overflow:hidden;"></div>
-            </div>
-            <p style="color:#9C9DB8;margin-top:16px;font-size:14px;">📷 ضع الكود أمام الكاميرا</p>
-            <button onclick="this.parentElement.remove();" style="margin-top:16px;padding:12px 32px;border-radius:12px;background:#F26D6D;color:#fff;font-weight:700;border:none;font-size:16px;">
-                ✖ إلغاء
-            </button>
-        `;
-        document.body.appendChild(container);
-        
-        const videoContainer = container.querySelector("#qrScanVideo");
-        videoContainer.appendChild(video);
         await video.play();
         
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        
-        const scanInterval = setInterval(() => {
-            if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const code = jsQR(imageData.data, imageData.width, imageData.height);
-                
-                if (code && code.data && code.data.length > 0) {
-                    clearInterval(scanInterval);
-                    stream.getTracks().forEach(track => track.stop());
-                    container.remove();
-                    
-                    const toWallet = code.data.trim();
-                    if (toWallet === currentWalletNumber) {
-                        showToast("⚠️ لا يمكن التحويل لنفس المحفظة", "error");
-                        return;
-                    }
-                    
-                    document.getElementById("toWalletNumber").value = toWallet;
-                    showToast("✅ تم مسح الكود: " + toWallet);
-                    document.getElementById("transferAmount").focus();
-                }
-            }
-        }, 300);
-        
-        setTimeout(() => {
-            clearInterval(scanInterval);
-            stream.getTracks().forEach(track => track.stop());
-            if (container.parentElement) {
-                container.remove();
-                showToast("⏳ انتهى وقت المسح", "error");
-            }
-        }, 30000);
+        startQRScanning();
         
     } catch (error) {
         console.error("❌ Camera error:", error);
         showToast("⚠️ تعذر فتح الكاميرا - استخدم رفع الصورة بدلاً من ذلك 🖼️", "error");
+        closeQRScanner();
     }
 }
 
+function closeQRScanner() {
+    if (qrStream) {
+        qrStream.getTracks().forEach(track => track.stop());
+        qrStream = null;
+    }
+    if (qrScanInterval) {
+        clearInterval(qrScanInterval);
+        qrScanInterval = null;
+    }
+    document.getElementById("qrScannerOverlay").classList.remove("active");
+    const video = document.getElementById("qrCamera");
+    video.srcObject = null;
+}
+
+function startQRScanning() {
+    const video = document.getElementById("qrCamera");
+    const canvas = document.getElementById("qrCanvas");
+    const ctx = canvas.getContext("2d");
+    
+    if (qrScanInterval) clearInterval(qrScanInterval);
+    
+    qrScanInterval = setInterval(() => {
+        if (video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+            
+            if (code && code.data && code.data.length > 0) {
+                const walletNumber = code.data.trim();
+                
+                if (/^\d{4,10}$/.test(walletNumber)) {
+                    clearInterval(qrScanInterval);
+                    qrScanInterval = null;
+                    
+                    if (qrStream) {
+                        qrStream.getTracks().forEach(track => track.stop());
+                        qrStream = null;
+                    }
+                    document.getElementById("qrScannerOverlay").classList.remove("active");
+                    document.getElementById("qrCamera").srcObject = null;
+                    
+                    if (walletNumber === currentWalletNumber) {
+                        showToast("⚠️ لا يمكن التحويل لنفس المحفظة", "error");
+                        return;
+                    }
+                    
+                    document.getElementById("toWalletNumber").value = walletNumber;
+                    showToast("✅ تم مسح الكود: " + walletNumber);
+                    document.getElementById("transferAmount").focus();
+                }
+            }
+        }
+    }, 300);
+    
+    setTimeout(() => {
+        if (qrScanInterval) {
+            clearInterval(qrScanInterval);
+            qrScanInterval = null;
+            showToast("⏳ انتهى وقت المسح", "error");
+            closeQRScanner();
+        }
+    }, 30000);
+}
+
 // ==============================================
-// 🔧 مسح QR Code من الصورة (بديل الكاميرا) 🆕
+// 🔧 مسح QR Code من الصورة (بديل الكاميرا)
 // ==============================================
 function uploadQRImage() {
     if (!currentWalletNumber) {
@@ -1121,14 +1199,14 @@ function uploadQRImage() {
                     const code = jsQR(imageData.data, imageData.width, imageData.height);
                     
                     if (code && code.data && code.data.length > 0) {
-                        const toWallet = code.data.trim();
-                        if (toWallet === currentWalletNumber) {
+                        const walletNumber = code.data.trim();
+                        if (walletNumber === currentWalletNumber) {
                             showToast("⚠️ لا يمكن التحويل لنفس المحفظة", "error");
                             hideLoader();
                             return;
                         }
-                        document.getElementById("toWalletNumber").value = toWallet;
-                        showToast("✅ تم مسح الكود: " + toWallet);
+                        document.getElementById("toWalletNumber").value = walletNumber;
+                        showToast("✅ تم مسح الكود: " + walletNumber);
                         document.getElementById("transferAmount").focus();
                     } else {
                         showToast("❌ لم يتم العثور على QR Code في الصورة", "error");
