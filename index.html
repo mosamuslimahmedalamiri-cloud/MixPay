@@ -153,6 +153,36 @@ input { font-family: inherit; }
 .ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.45); transform: scale(0); animation: rippleAnim .6s ease-out forwards; pointer-events: none; }
 @keyframes rippleAnim { to { transform: scale(2.6); opacity: 0; } }
 
+/* حقول كلمة المرور / PIN مع زر الإظهار والإخفاء */
+.password-field { position: relative; }
+.password-field input { padding-inline-end: 46px; }
+.eye-toggle { position: absolute; top: 50%; inset-inline-end: 12px; transform: translateY(-50%); width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); border-radius: 50%; transition: color .2s ease, background .2s ease, transform .15s ease; }
+.eye-toggle:hover { color: var(--mix-teal); background: rgba(63,214,198,0.1); }
+.eye-toggle:active { transform: translateY(-50%) scale(0.85); }
+.eye-toggle svg { width: 19px; height: 19px; }
+.eye-toggle .eye-off { display: none; }
+.eye-toggle.revealed .eye-on { display: none; }
+.eye-toggle.revealed .eye-off { display: block; }
+
+/* بطاقة إعدادات PIN في الملف الشخصي */
+.pin-card { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.pin-card .pin-glyph { width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, var(--mix-violet), var(--mix-teal)); display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 8px 18px rgba(123,108,246,0.32); flex-shrink: 0; }
+.pin-card .pin-text { flex: 1; }
+.pin-card .pin-title { font-size: 13.5px; font-weight: 700; }
+.pin-card .pin-dots { font-size: 12px; color: var(--text-muted); letter-spacing: 3px; margin-top: 2px; }
+.pin-edit-btn { width: 38px; height: 38px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; transition: transform .18s cubic-bezier(.34,1.56,.64,1), background .2s ease; }
+.pin-edit-btn:active { transform: scale(0.88) rotate(-8deg); background: var(--mix-violet); }
+
+.profile-row-icon { width: 32px; height: 32px; border-radius: 10px; background: var(--surface-2); display: inline-flex; align-items: center; justify-content: center; font-size: 14px; margin-inline-end: 8px; }
+
+/* نبضة تحديث الرصيد */
+.balance-pulse { animation: balancePulse .6s ease; }
+@keyframes balancePulse { 0% { transform: scale(1); } 30% { transform: scale(1.06); text-shadow: 0 0 18px rgba(63,214,198,0.7); } 100% { transform: scale(1); } }
+
+/* قصاصات الاحتفال (Confetti) */
+.confetti-piece { position: fixed; top: -12px; z-index: 400; border-radius: 2px; pointer-events: none; animation: confettiFall linear forwards; }
+@keyframes confettiFall { to { transform: translateY(110vh) rotate(600deg); opacity: 0; } }
+
 .form-footer-link { text-align: center; font-size: 13px; color: var(--text-secondary); margin-top: 20px; }
 .form-footer-link a { color: var(--mix-teal); font-weight: 600; cursor: pointer; }
 
@@ -167,7 +197,7 @@ input { font-family: inherit; }
 .modal-handle { width: 40px; height: 4px; background: var(--surface-2); border-radius: 4px; margin: 0 auto 18px; }
 .modal-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; margin-bottom: 16px; text-align: center; }
 .confirm-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; font-size: 13.5px; border-bottom: 1px solid rgba(255,255,255,0.06); }
-.confirm-row span:first-child { color: var(--text-secondary); }
+.confirm-row span:first-child { color: var(--text-secondary); display: flex; align-items: center; }
 .confirm-row.total span:last-child { color: var(--gold); font-weight: 700; }
 .success-icon { font-size: 56px; text-align: center; margin-bottom: 10px; }
 
@@ -218,7 +248,13 @@ input { font-family: inherit; }
       </div>
       <div class="form-group">
         <label>كلمة المرور</label>
-        <input type="password" id="loginPassword" placeholder="••••••••" required />
+        <div class="password-field">
+          <input type="password" id="loginPassword" placeholder="••••••••" required />
+          <button type="button" class="eye-toggle" onclick="togglePasswordField('loginPassword', this)">
+            <svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18"/><path d="M10.6 5.2A11.6 11.6 0 0 1 12 5c7 0 11 7 11 7a13.5 13.5 0 0 1-3.4 4.1M6.6 6.6C3.6 8.5 1 12 1 12s4 7 11 7a10.9 10.9 0 0 0 5.4-1.4"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+          </button>
+        </div>
       </div>
       <button type="submit" class="btn-primary">تسجيل الدخول</button>
       <div class="form-footer-link">
@@ -244,11 +280,23 @@ input { font-family: inherit; }
       </div>
       <div class="form-group">
         <label>كلمة المرور</label>
-        <input type="password" id="registerPassword" placeholder="6 أحرف على الأقل" minlength="6" required />
+        <div class="password-field">
+          <input type="password" id="registerPassword" placeholder="6 أحرف على الأقل" minlength="6" required />
+          <button type="button" class="eye-toggle" onclick="togglePasswordField('registerPassword', this)">
+            <svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18"/><path d="M10.6 5.2A11.6 11.6 0 0 1 12 5c7 0 11 7 11 7a13.5 13.5 0 0 1-3.4 4.1M6.6 6.6C3.6 8.5 1 12 1 12s4 7 11 7a10.9 10.9 0 0 0 5.4-1.4"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+          </button>
+        </div>
       </div>
       <div class="form-group">
         <label>رمز PIN (4 إلى 6 أرقام) — لتأكيد التحويلات</label>
-        <input type="password" id="registerPin" inputmode="numeric" placeholder="••••" maxlength="6" required />
+        <div class="password-field">
+          <input type="password" id="registerPin" inputmode="numeric" placeholder="••••" maxlength="6" required />
+          <button type="button" class="eye-toggle" onclick="togglePasswordField('registerPin', this)">
+            <svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18"/><path d="M10.6 5.2A11.6 11.6 0 0 1 12 5c7 0 11 7 11 7a13.5 13.5 0 0 1-3.4 4.1M6.6 6.6C3.6 8.5 1 12 1 12s4 7 11 7a10.9 10.9 0 0 0 5.4-1.4"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+          </button>
+        </div>
       </div>
       <button type="submit" class="btn-primary">إنشاء الحساب</button>
       <div class="form-footer-link">
@@ -380,15 +428,28 @@ input { font-family: inherit; }
       <h2>حسابي</h2>
     </div>
     <div class="glass-card" style="margin:0 20px 20px;text-align:center;">
-      <div style="width:72px;height:72px;border-radius:50%;background:var(--grad-mix);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px;">👤</div>
+      <div style="width:76px;height:76px;border-radius:50%;background:var(--grad-mix);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 12px;box-shadow:0 0 0 4px rgba(123,108,246,0.16), 0 10px 26px rgba(123,108,246,0.35);position:relative;">👤</div>
       <div id="profileName" style="font-weight:700;font-size:17px;"></div>
       <div id="profileEmail" style="color:var(--text-secondary);font-size:13px;margin-top:4px;"></div>
     </div>
     <div class="form-page" style="padding-top:0;">
       <div class="glass-card" style="margin-bottom:12px;">
-        <div class="confirm-row"><span>رقم المحفظة</span><span id="profileWallet">-</span></div>
-        <div class="confirm-row"><span>تاريخ الانضمام</span><span id="profileJoinDate">-</span></div>
+        <div class="confirm-row"><span><span class="profile-row-icon">🔢</span>رقم المحفظة</span><span id="profileWallet">-</span></div>
+        <div class="confirm-row" style="border-bottom:none;"><span><span class="profile-row-icon">📅</span>تاريخ الانضمام</span><span id="profileJoinDate">-</span></div>
       </div>
+
+      <div class="glass-card" style="margin-bottom:12px;">
+        <div class="pin-card">
+          <div class="pin-glyph">🔐</div>
+          <div class="pin-text">
+            <div class="pin-title">رمز PIN للتحويلات</div>
+            <div class="pin-dots">• • • • مفعّل</div>
+          </div>
+          <button type="button" class="pin-edit-btn" onclick="openChangePinModal()" title="تغيير الرمز">✏️</button>
+        </div>
+        <p style="font-size:11.5px;color:var(--text-muted);">يُستخدم هذا الرمز لتأكيد عمليات التحويل. غيّره بشكل دوري للحفاظ على أمان محفظتك.</p>
+      </div>
+
       <button class="btn-secondary" id="logoutBtn" style="color:var(--danger);">🚪 تسجيل الخروج</button>
     </div>
   </section>
@@ -430,7 +491,13 @@ input { font-family: inherit; }
     <form id="transferConfirmForm">
       <div class="form-group" style="margin-top:16px;">
         <label>أدخل PIN للتأكيد</label>
-        <input type="password" id="transferPin" inputmode="numeric" maxlength="6" placeholder="••••" required />
+        <div class="password-field">
+          <input type="password" id="transferPin" inputmode="numeric" maxlength="6" placeholder="••••" required />
+          <button type="button" class="eye-toggle" onclick="togglePasswordField('transferPin', this)">
+            <svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18"/><path d="M10.6 5.2A11.6 11.6 0 0 1 12 5c7 0 11 7 11 7a13.5 13.5 0 0 1-3.4 4.1M6.6 6.6C3.6 8.5 1 12 1 12s4 7 11 7a10.9 10.9 0 0 0 5.4-1.4"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+          </button>
+        </div>
       </div>
       <button type="submit" class="btn-primary">تأكيد وإرسال</button>
       <button type="button" class="btn-secondary" style="margin-top:10px;" onclick="closeModal('confirmTransferModal')">إلغاء</button>
@@ -448,6 +515,49 @@ input { font-family: inherit; }
     <div class="confirm-row total"><span>السعر</span><span id="productModalPrice">-</span></div>
     <button class="btn-primary" style="margin-top:16px;" onclick="confirmPurchase()">🔄 استبدال الآن</button>
     <button class="btn-secondary" style="margin-top:10px;" onclick="closeModal('productModal')">إغلاق</button>
+  </div>
+</div>
+
+<!-- ============ نافذة: تغيير رمز PIN ============ -->
+<div class="modal-overlay" id="changePinModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔐 تغيير رمز PIN</div>
+    <p style="color:var(--text-secondary);font-size:12.5px;text-align:center;margin-bottom:16px;">أدخل رمزك الحالي، ثم اختر رمزاً جديداً من 4 إلى 6 أرقام</p>
+    <form id="changePinForm">
+      <div class="form-group">
+        <label>الرمز الحالي</label>
+        <div class="password-field">
+          <input type="password" id="currentPinInput" inputmode="numeric" maxlength="6" placeholder="••••" required />
+          <button type="button" class="eye-toggle" onclick="togglePasswordField('currentPinInput', this)">
+            <svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18"/><path d="M10.6 5.2A11.6 11.6 0 0 1 12 5c7 0 11 7 11 7a13.5 13.5 0 0 1-3.4 4.1M6.6 6.6C3.6 8.5 1 12 1 12s4 7 11 7a10.9 10.9 0 0 0 5.4-1.4"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>الرمز الجديد</label>
+        <div class="password-field">
+          <input type="password" id="newPinInput" inputmode="numeric" maxlength="6" placeholder="••••" required />
+          <button type="button" class="eye-toggle" onclick="togglePasswordField('newPinInput', this)">
+            <svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18"/><path d="M10.6 5.2A11.6 11.6 0 0 1 12 5c7 0 11 7 11 7a13.5 13.5 0 0 1-3.4 4.1M6.6 6.6C3.6 8.5 1 12 1 12s4 7 11 7a10.9 10.9 0 0 0 5.4-1.4"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>تأكيد الرمز الجديد</label>
+        <div class="password-field">
+          <input type="password" id="confirmPinInput" inputmode="numeric" maxlength="6" placeholder="••••" required />
+          <button type="button" class="eye-toggle" onclick="togglePasswordField('confirmPinInput', this)">
+            <svg class="eye-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18"/><path d="M10.6 5.2A11.6 11.6 0 0 1 12 5c7 0 11 7 11 7a13.5 13.5 0 0 1-3.4 4.1M6.6 6.6C3.6 8.5 1 12 1 12s4 7 11 7a10.9 10.9 0 0 0 5.4-1.4"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+          </button>
+        </div>
+      </div>
+      <button type="submit" class="btn-primary">💾 حفظ الرمز الجديد</button>
+      <button type="button" class="btn-secondary" style="margin-top:10px;" onclick="closeModal('changePinModal')">إلغاء</button>
+    </form>
   </div>
 </div>
 
@@ -520,13 +630,44 @@ function openModal(id) { const m = document.getElementById(id); if (m) m.classLi
 function closeModal(id) { const m = document.getElementById(id); if (m) m.classList.remove("open"); }
 
 // ==============================================
+// إظهار / إخفاء كلمة المرور أو PIN
+// ==============================================
+function togglePasswordField(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const revealed = input.type === "text";
+  input.type = revealed ? "password" : "text";
+  btn.classList.toggle("revealed", !revealed);
+}
+
+// ==============================================
+// مؤثر احتفالي (Confetti) للعمليات الناجحة
+// ==============================================
+function burstConfetti(count = 26) {
+  const colors = ["#7B6CF6", "#3FD6C6", "#E8B45C", "#F26D9C", "#6C7BF6"];
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement("div");
+    piece.className = "confetti-piece";
+    const size = 6 + Math.random() * 6;
+    piece.style.width = size + "px";
+    piece.style.height = (size * 0.4) + "px";
+    piece.style.left = (Math.random() * 100) + "vw";
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDuration = (1.8 + Math.random() * 1.4) + "s";
+    piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 3400);
+  }
+}
+
+// ==============================================
 // مؤثر Ripple بصري عند الضغط على العناصر التفاعلية
 // ==============================================
 function attachRipple(selector) {
   document.querySelectorAll(selector).forEach((el) => {
     if (el.dataset.rippleBound) return;
     el.dataset.rippleBound = "1";
-    el.style.position = el.style.position || "relative";
+    if (getComputedStyle(el).position === "static") el.style.position = "relative";
     el.style.overflow = "hidden";
     el.addEventListener("pointerdown", (e) => {
       const rect = el.getBoundingClientRect();
@@ -542,7 +683,7 @@ function attachRipple(selector) {
   });
 }
 function initVisualEffects() {
-  attachRipple(".btn-primary, .btn-secondary, .quick-action, .icon-btn, .product-card, .bottom-nav a");
+  attachRipple(".btn-primary, .btn-secondary, .quick-action, .icon-btn, .product-card, .bottom-nav a, .pin-edit-btn, .eye-toggle");
   document.querySelectorAll(".wallet-card").forEach((card) => {
     if (!card.querySelector(".card-shine")) {
       const shine = document.createElement("div");
@@ -613,6 +754,49 @@ function hashPin(pin) {
     hash = hash & hash;
   }
   return "pin_" + Math.abs(hash).toString(16) + "_" + pin.length;
+}
+
+// ==============================================
+// 🔐 تغيير رمز PIN من الملف الشخصي
+// ==============================================
+function openChangePinModal() {
+  const form = document.getElementById("changePinForm");
+  if (form) form.reset();
+  document.querySelectorAll("#changePinModal .eye-toggle.revealed").forEach((btn) => btn.classList.remove("revealed"));
+  document.querySelectorAll("#changePinModal input[type='text']").forEach((input) => (input.type = "password"));
+  openModal("changePinModal");
+}
+
+async function changePin(currentPin, newPin, confirmPin) {
+  if (!auth.currentUser) { showToast("🔒 يجب تسجيل الدخول أولاً", "error"); return; }
+  if (!/^\d{4,6}$/.test(currentPin)) { showToast("⚠️ أدخل رمزك الحالي بشكل صحيح", "error"); return; }
+  if (!/^\d{4,6}$/.test(newPin)) { showToast("⚠️ الرمز الجديد يجب أن يكون 4-6 أرقام", "error"); return; }
+  if (newPin !== confirmPin) { showToast("⚠️ تأكيد الرمز الجديد غير مطابق", "error"); return; }
+  if (newPin === currentPin) { showToast("⚠️ الرمز الجديد يجب أن يختلف عن الحالي", "error"); return; }
+
+  showLoader();
+  try {
+    const userRef = db.collection("users").doc(auth.currentUser.uid);
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) throw new Error("user-not-found");
+
+    if ((userDoc.data().pinHash || "") !== hashPin(currentPin)) {
+      throw new Error("invalid-pin");
+    }
+
+    await userRef.update({ pinHash: hashPin(newPin) });
+    if (currentUserData) currentUserData.pinHash = hashPin(newPin);
+
+    closeModal("changePinModal");
+    showToast("🔐 تم تحديث رمز PIN بنجاح ✅");
+    burstConfetti(22);
+  } catch (error) {
+    console.error("changePin error:", error);
+    const map = { "invalid-pin": "🔑 الرمز الحالي غير صحيح", "user-not-found": "❌ المستخدم غير موجود" };
+    showToast(map[error.message] || "⚠️ تعذر تحديث الرمز", "error");
+  } finally {
+    hideLoader();
+  }
 }
 
 async function loginUser(email, password) {
@@ -754,9 +938,20 @@ async function loadWalletData(uid) {
 
 function listenToWalletBalance(walletNumber) {
   if (!walletNumber) return;
+  let lastBalance = null;
   db.collection("wallets").doc(walletNumber).onSnapshot((doc) => {
     if (doc.exists) {
-      document.querySelectorAll(".js-balance").forEach((el) => (el.textContent = formatIQD(doc.data().balance || 0)));
+      const balance = doc.data().balance || 0;
+      const changed = lastBalance !== null && balance !== lastBalance;
+      lastBalance = balance;
+      document.querySelectorAll(".js-balance").forEach((el) => {
+        el.textContent = formatIQD(balance);
+        if (changed) {
+          el.classList.remove("balance-pulse");
+          void el.offsetWidth;
+          el.classList.add("balance-pulse");
+        }
+      });
     }
   });
 }
@@ -970,6 +1165,7 @@ async function executeTransfer() {
 
     closeModal("confirmTransferModal");
     showToast("🔄 تم التحويل بنجاح ✅");
+    burstConfetti();
     document.getElementById("transferLookupForm").reset();
     document.getElementById("transferPin").value = "";
     pendingTransfer = null;
@@ -1089,6 +1285,7 @@ async function confirmPurchase() {
 
     closeModal("productModal");
     showToast("🛍️ تمت عملية الشراء بنجاح ✅");
+    burstConfetti();
   } catch (error) {
     console.error("confirmPurchase error:", error);
     showToast(translatePurchaseError(error.message), "error");
@@ -1182,6 +1379,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await redeemCodeDirectly(code);
       document.getElementById("successAmount").textContent = formatIQD(result.value);
       openModal("successModal");
+      burstConfetti();
       codeInput.value = "";
       showToast("🎉 تم استرداد الكود بنجاح!");
     } catch (error) {
@@ -1210,6 +1408,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("logoutBtn").addEventListener("click", logout);
+
+  document.getElementById("changePinForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const currentPin = document.getElementById("currentPinInput").value.trim();
+    const newPin = document.getElementById("newPinInput").value.trim();
+    const confirmPin = document.getElementById("confirmPinInput").value.trim();
+    changePin(currentPin, newPin, confirmPin);
+  });
 
   let authStateHandled = false;
 
